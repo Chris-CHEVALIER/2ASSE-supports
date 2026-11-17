@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TP1 – Premiers programmes – 2ASSE</title>
   <link rel="stylesheet" href="../assets/css/enonce.css">
+  <style>
+    .capture { display: block; max-width: 100%; margin: 12px auto 4px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+    .legende { text-align: center; font-size: 14px; color: #5b6b85; margin: 0 0 16px; }
+  </style>
 </head>
 <body>
 
@@ -43,41 +47,67 @@
     <h2><span class="num">0</span> Le dépôt et le Codespace</h2>
     <div class="meta"><span class="etiquette clair">GitHub · Codespaces · Git</span></div>
 
-    <p>Les trois TP vivent dans <strong>un seul dépôt</strong>, créé à partir de mon modèle. Il contient déjà la configuration du Codespace, un <code>Makefile</code> par TP et le fichier de réponses du TP1.</p>
+    <p>Les trois TP vivent dans <strong>un seul dépôt</strong>, créé à partir de mon modèle. Il contient déjà la configuration du Codespace, un <code>Makefile</code> par TP et le fichier de réponses du TP1.
+      Vous n'avez <strong>rien à installer sur votre ordinateur</strong> : un navigateur récent (Chrome, Edge, Firefox) suffit.</p>
 
+    <h3>Créer votre dépôt</h3>
     <ol>
       <li>Ouvrez le <a href="https://github.com/Chris-CHEVALIER/2asse-modele" target="_blank">dépôt modèle 2asse-modele</a>, cliquez sur <strong>Use this template</strong> puis <strong>Create a new repository</strong> :
         <ul>
           <li>nom : <code>2asse-nom-prenom</code> (avec votre nom et votre prénom) ;</li>
           <li>visibilité : <strong>Private</strong>.</li>
         </ul>
+        <img class="capture" src="../assets/img/github-use-template.jpg" alt="Menu Use this template ouvert : Create a new repository et Open in a codespace" style="max-width: 560px;">
+        <p class="legende">Use this template → Create a new repository. N'utilisez pas « Open in a codespace » : votre travail ne serait enregistré dans aucun dépôt.</p>
       </li>
-      <li>Dans <strong>Settings → Collaborators</strong>, cliquez sur <strong>Add people</strong> et invitez <strong>Chris-CHEVALIER</strong>.</li>
-      <li>Revenez sur la page d'accueil de votre dépôt. Cliquez sur <strong>Code</strong>, onglet <strong>Codespaces</strong>, puis <strong>Create codespace on main</strong>.
-        La première ouverture prend quelques minutes : le Codespace installe NASM, ld et GDB.</li>
-      <li>Un VS Code s'ouvre dans le navigateur. Dans son terminal (en bas), vérifiez les outils :
+      <li>Dans votre nouveau dépôt, ouvrez <strong>Settings → Collaborators</strong>, cliquez sur <strong>Add people</strong> et invitez <strong>Chris-CHEVALIER</strong>.</li>
+    </ol>
+
+    <h3>Ouvrir votre Codespace</h3>
+    <ol>
+      <li>Sur la page d'accueil de votre dépôt, cliquez sur <strong>Code</strong>, onglet <strong>Codespaces</strong>, puis sur le bouton vert <strong>Create codespace on main</strong>.
+        La première ouverture prend quelques minutes : le Codespace construit sa machine Linux et y installe NASM, ld et GDB.</li>
+      <li>Un VS Code s'ouvre dans le navigateur, avec le <code>README.md</code> affiché en aperçu. Une fenêtre demande <strong>« Faites-vous confiance aux auteurs des fichiers de ce dossier ? »</strong> :
+        cliquez sur <strong>Approuver le dossier et continuer</strong>. Sans cela, le terminal reste bloqué.
+        <img class="capture" src="../assets/img/codespace-confiance.jpg" alt="Fenêtre Faites-vous confiance aux auteurs des fichiers de ce dossier, bouton Approuver le dossier et continuer" style="max-width: 420px;">
+        <p class="legende">Ce dossier est votre propre dépôt, créé à partir de mon modèle : vous pouvez l'approuver.</p>
+      </li>
+      <li>Dans le terminal (en bas de l'écran), vérifiez les outils :
         <pre data-titre="Terminal"><code class="language-plaintext">
           nasm -v
           gdb --version
         </code></pre>
+        Vous devez lire <code>NASM version 2.16.01</code> puis <code>GNU gdb (Ubuntu 15.1…) 15.1</code>.
       </li>
-      <li>Ouvrez <code>README.md</code> et remplacez « Prénom NOM » par vos prénom et nom.</li>
+      <li>Ouvrez <code>README.md</code> et remplacez « Prénom NOM » par vos prénom et nom. Pour modifier le fichier plutôt que son aperçu, cliquez sur son nom dans l'explorateur, à gauche.</li>
     </ol>
+
+    <div class="encadre marine">
+      <span class="intitule">Si un outil manque (« command not found »)</span>
+      Lancez le script d'installation fourni dans le dépôt, puis vérifiez de nouveau :
+      <pre data-titre="Terminal"><code class="language-plaintext">
+        bash .devcontainer/install.sh
+      </code></pre>
+      Pour retrouver un Codespace plus tard, ouvrez <a href="https://github.com/codespaces" target="_blank">github.com/codespaces</a> : n'en créez pas un nouveau à chaque séance.
+      Un Codespace s'arrête seul après 30 minutes d'inactivité et vos fichiers y sont conservés.
+    </div>
 
     <div class="encadre">
       <span class="intitule">Faire un commit et le pousser depuis le Codespace</span>
-      Dans la barre de gauche, ouvrez le panneau <strong>Source Control</strong> (l'icône en forme de branche). Écrivez un message qui dit ce qui a changé,
-      cliquez sur <strong>Commit</strong> (acceptez d'ajouter tous les fichiers modifiés), puis sur <strong>Sync Changes</strong> pour envoyer le commit sur GitHub.
+      Dans la barre de gauche, ouvrez le panneau <strong>Contrôle de code source</strong> (l'icône en forme de branche). Écrivez un message qui dit ce qui a changé,
+      cliquez sur <strong>Validation</strong> (acceptez d'inclure tous les fichiers modifiés), puis sur <strong>Synchroniser les modifications</strong> pour envoyer le commit sur GitHub.
+      <img class="capture" src="../assets/img/codespace-commit.jpg" alt="Panneau Contrôle de code source : message, bouton Validation et README.md modifié">
+      <p class="legende">Le panneau Contrôle de code source, ici avec un <code>README.md</code> modifié. Si votre VS Code est en anglais, les boutons s'appellent <strong>Commit</strong> et <strong>Sync Changes</strong>.</p>
     </div>
     <p class="muet" style="font-size: 14px;">En ligne de commande, les mêmes actions s'écrivent <code>git add -A</code>, <code>git commit -m "message"</code> puis <code>git push</code>.
-      Un Codespace s'arrête seul après 30 minutes d'inactivité. Vos fichiers y sont conservés, mais seul ce qui est poussé sur GitHub compte pour le rendu.
-      GitHub et Codespaces appartiennent à Microsoft et relèvent du droit américain (<em>Cloud Act</em>) : des alternatives ouvertes existent, comme <a href="https://codeberg.org/" target="_blank">Codeberg</a>, ou une machine virtuelle Linux sur votre ordinateur.</p>
+      Seul ce qui est poussé sur GitHub compte pour le rendu.
+      GitHub et Codespaces appartiennent à Microsoft et relèvent du droit américain (<em>Cloud Act</em>) : des alternatives ouvertes existent, comme <a href="https://codeberg.org/" target="_blank">Codeberg</a>, ou une machine virtuelle Linux sur votre ordinateur avec les mêmes outils.</p>
 
     <div class="encadre">
       <span class="intitule">Pour valider, assurez-vous que…</span>
       <ul>
         <li>votre dépôt est privé et je suis invité comme collaborateur ;</li>
-        <li><code>nasm -v</code> et <code>gdb --version</code> affichent une version dans le terminal du Codespace ;</li>
+        <li><code>nasm -v</code> et <code>gdb --version</code> affichent leur version dans le terminal du Codespace ;</li>
         <li>le <code>README.md</code> porte votre nom et ce commit est poussé sur GitHub.</li>
       </ul>
     </div>
@@ -88,7 +118,7 @@
     <h2><span class="num">1</span> Bonjour</h2>
     <div class="meta"><span class="etiquette clair">Sections · appels système write et exit</span></div>
 
-    <p>Dans le terminal, placez-vous dans le dossier du TP avec <code>cd tp1</code>. Créez le fichier <code>hello.asm</code> et recopiez le programme du cours :</p>
+    <p>Dans le terminal, placez-vous dans le dossier du TP avec <code>cd tp1</code>. Créez le fichier <code>hello.asm</code> avec la commande <code>code hello.asm</code>, qui l'ouvre dans l'éditeur, et recopiez le programme du cours :</p>
     <pre data-titre="tp1/hello.asm"><code class="language-x86asm">
       ; hello.asm : affiche un message puis quitte
       section .data
