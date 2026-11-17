@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Débogage et rétro-ingénierie – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/hexagone.css">
+  <link rel="stylesheet" href="../assets/css/asm.css">
+</head>
+<body data-pied="2ASSE – Architecture bas niveau et assembleur · Cours 3 – Débogage et rétro-ingénierie">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ================================================================== -->
+  <section data-layout="titre">
+    <h1>Débogage et rétro-ingénierie</h1>
+    <div class="sous-titre">
+      <span class="code-module">2ASSE</span> – Cours 3<br>
+      Chris CHEVALIER
+    </div>
+  </section>
+
+  <section data-layout="sommaire">
+    <h1>Sommaire</h1>
+    <ol>
+      <li>GDB en profondeur</li>
+      <li>Du C à l'assembleur</li>
+      <li>Analyser un binaire inconnu</li>
+      <li>Le dépassement de tampon</li>
+      <li>Le cadre légal</li>
+    </ol>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #1 GDB EN PROFONDEUR                                               -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#1</div>
+    <h2>GDB en profondeur</h2>
+    <div class="sous-titre">Débogage et rétro-ingénierie</div>
+  </section>
+
+  <section>
+    <h2>Avancer dans un programme</h2>
+    <div class="corps">
+      <table class="serre">
+        <tr><th>Commande</th><th>Effet</th></tr>
+        <tr><td><code>break *0x401216</code></td><td>point d'arrêt sur une <strong>adresse</strong> précise (le <code>*</code> est obligatoire)</td></tr>
+        <tr><td><code>info breakpoints</code> / <code>delete 2</code></td><td>liste les points d'arrêt / supprime le n° 2</td></tr>
+        <tr><td><code>si</code> / <code>ni</code></td><td>une instruction ; <code>ni</code> exécute un <code>call</code> d'un coup, sans entrer dans la fonction</td></tr>
+        <tr><td><code>finish</code></td><td>termine la fonction en cours et s'arrête juste après son <code>call</code></td></tr>
+        <tr><td><code>continue</code></td><td>reprend jusqu'au prochain point d'arrêt</td></tr>
+        <tr><td><code>disassemble check</code></td><td>désassemble une fonction ; <code>=&gt;</code> marque l'instruction courante</td></tr>
+        <tr><td><code>display/i $rip</code></td><td>affiche automatiquement la prochaine instruction après chaque pas</td></tr>
+        <tr><td><code>watch *(long*)0x402000</code></td><td><strong>point de surveillance</strong> : arrête le programme quand cette case mémoire change</td></tr>
+      </table>
+      <p class="petit muet">Sur un programme compilé en C, <code>ni</code> évite d'entrer dans <code>printf</code> ou <code>strlen</code>, ces fonctions de la bibliothèque standard qui comptent des centaines d'instructions.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Modifier un programme pendant son exécution</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p>GDB ne se contente pas d'observer : il peut <strong>changer l'état</strong> du processus.</p>
+          <table class="serre">
+            <tr><th>Commande</th><th>Effet</th></tr>
+            <tr><td><code>set $rax = 1</code></td><td>change un registre</td></tr>
+            <tr><td><code>set $rip = 0x401268</code></td><td>saute ailleurs</td></tr>
+            <tr><td><code>set {char}0x404040 = 'A'</code></td><td>écrit un octet en mémoire</td></tr>
+            <tr><td><code>call (int)puts("Coucou")</code></td><td>appelle une fonction</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="encadre marine">
+            Une vérification de mot de passe se termine presque toujours par un saut conditionnel. Il suffit de changer le résultat d'une comparaison (<code>set $rax</code>, ou l'indicateur ZF) pour passer de l'autre côté.
+          </div>
+          <p class="petit">Conséquence : une protection qui s'exécute <strong>sur la machine de l'utilisateur</strong> peut toujours être contournée par cet utilisateur. Les vraies vérifications se font sur un serveur.</p>
+          <p class="petit muet"><code>set $eflags |= 0x40</code> met ZF à 1 (ZF est le bit n° 6 de <code>eflags</code>).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #2 DU C À L'ASSEMBLEUR                                             -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#2</div>
+    <h2>Du C à l'assembleur</h2>
+    <div class="sous-titre">Débogage et rétro-ingénierie</div>
+  </section>
+
+  <section>
+    <h2>Ce que produit un compilateur</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <pre class="mini" data-titre="bonus.c" data-extrait><code class="language-c" data-trim>
+int add_bonus(int grade)
+{
+    int bonus = 2;
+    return grade + bonus;
+}
+
+int main(void)
+{
+    return add_bonus(14);
+}
+</code></pre>
+          <pre class="terminal mini" data-titre="Terminal" data-extrait><code class="language-plaintext" data-trim>
+$ gcc -O0 -S -masm=intel bonus.c
+</code></pre>
+          <p class="petit muet" style="margin: 0;"><code>-S</code> s'arrête à l'assembleur (fichier <code>bonus.s</code>), <code>-masm=intel</code> choisit la syntaxe du cours, <code>-O0</code> désactive l'optimisation.</p>
+        </div>
+        <div>
+          <pre class="mini" data-titre="bonus.s (extrait)" data-extrait><code class="language-x86asm" data-trim>
+add_bonus:
+    push    rbp
+    mov     rbp, rsp
+    mov     DWORD PTR -20[rbp], edi
+    mov     DWORD PTR -4[rbp], 2
+    mov     edx, DWORD PTR -20[rbp]
+    mov     eax, DWORD PTR -4[rbp]
+    add     eax, edx
+    pop     rbp
+    ret
+main:
+    push    rbp
+    mov     rbp, rsp
+    mov     edi, 14
+    call    add_bonus
+    pop     rbp
+    ret
+</code></pre>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      On reconnaît tout : l'argument arrive dans edi (convention System V, int = 32 bits), le résultat repart dans eax, call et ret.
+      -20[rbp] est l'écriture de gcc pour [rbp - 20].
+    </aside>
+  </section>
+
+  <section>
+    <h2>Lire une fonction compilée</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul class="dense">
+            <li><strong>Prologue</strong> : <code>push rbp</code> puis <code>mov rbp, rsp</code>. <code>rbp</code> devient le repère fixe de la fonction</li>
+            <li><strong>Variables locales</strong> : sur la pile, sous <code>rbp</code>. Ici <code>bonus</code> est en <code>[rbp - 4]</code> et la copie de <code>grade</code> en <code>[rbp - 20]</code></li>
+            <li><strong>Épilogue</strong> : <code>pop rbp</code> (ou <code>leave</code>) puis <code>ret</code></li>
+            <li><code>DWORD PTR</code> : la taille de la case, comme <code>dword</code> en NASM. Un <code>int</code> fait 4 octets</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Avec l'optimisation</strong> (<code>gcc -O2</code>) :</p>
+          <pre class="compact" data-titre="bonus.s optimisé (extrait)" data-extrait><code class="language-x86asm" data-trim>
+add_bonus:
+    lea     eax, 2[rdi]
+    ret
+main:
+    mov     eax, 16
+    ret
+</code></pre>
+          <p class="petit">Le compilateur a supprimé la variable, calculé <code>14 + 2</code> d'avance et même évité l'appel. Un binaire optimisé ressemble beaucoup moins à son code source.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Les astuces des compilateurs</h2>
+    <div class="corps">
+      <p>Pour aller plus vite, les compilateurs remplacent les opérations coûteuses par des équivalents. Il faut savoir les reconnaître.</p>
+      <table class="serre">
+        <tr><th>Code machine</th><th>Signification</th><th>Pourquoi</th></tr>
+        <tr><td><code>xor eax, eax</code></td><td><code>eax = 0</code></td><td>instruction plus courte que <code>mov eax, 0</code></td></tr>
+        <tr><td><code>lea eax, [rdi + rdi*2]</code></td><td><code>eax = rdi × 3</code></td><td><code>lea</code> calcule sans toucher aux indicateurs</td></tr>
+        <tr><td><code>shl rax, 5</code> puis <code>sub rax, rdx</code></td><td><code>rax = rdx × 32 − rdx</code> = <code>rdx × 31</code></td><td>un décalage est plus rapide qu'une multiplication</td></tr>
+        <tr><td><code>mul</code> par une grande constante puis <code>shr</code></td><td>une <strong>division</strong> par une constante</td><td><code>div</code> est très lente : on multiplie par l'inverse</td></tr>
+        <tr><td><code>test eax, eax</code> puis <code>je</code></td><td>« si <code>eax</code> vaut 0 »</td><td>plus court qu'un <code>cmp eax, 0</code></td></tr>
+      </table>
+      <p class="petit muet">Décaler de <code>n</code> bits vers la gauche multiplie par 2<sup>n</sup> : <code>shl rax, 5</code> multiplie par 32.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #3 ANALYSER UN BINAIRE INCONNU                                     -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#3</div>
+    <h2>Analyser un binaire inconnu</h2>
+    <div class="sous-titre">Débogage et rétro-ingénierie</div>
+  </section>
+
+  <section>
+    <h2>Une démarche en trois temps</h2>
+    <div class="corps">
+      <div class="frise">
+        <div class="etape"><div class="date">1. Reconnaître</div><ul><li><code>file</code> : type, architecture</li><li><code>strings</code> : textes lisibles</li><li><code>nm</code> : noms des fonctions</li></ul></div>
+        <div class="etape"><div class="date">2. Analyse statique</div><ul><li><code>objdump -d -M intel</code> : désassembler sans exécuter</li><li>repérer les comparaisons et les sauts</li></ul></div>
+        <div class="etape marine"><div class="date">3. Analyse dynamique</div><ul><li>GDB : exécuter, s'arrêter, observer les registres et la mémoire</li><li>vérifier ses hypothèses</li></ul></div>
+      </div>
+      <div class="colonnes" style="margin-top: 10px;">
+        <div class="encadre">Commencez toujours par le plus simple : un mot de passe en clair se trouve en une commande avec <code>strings</code>.</div>
+        <div class="encadre">Notez au fur et à mesure ce que vous trouvez : adresses, valeurs, hypothèses. C'est votre compte rendu.</div>
+      </div>
+      <p class="petit muet" style="margin: 4px 0 0;">Outils professionnels : <a href="https://ghidra-sre.org/" target="_blank">Ghidra</a> (libre, publié par la NSA), <a href="https://rizin.re/" target="_blank">Rizin et Cutter</a> (libres), IDA (commercial). Ils reconstruisent même un pseudo-code C.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Reconnaître le terrain</h2>
+    <div class="corps">
+      <pre class="terminal compact" data-titre="Terminal"><code class="language-plaintext" data-trim>
+$ file pin
+pin: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, ...
+$ strings pin | grep -i acc
+Accès autorisé
+Accès refusé
+$ nm pin | grep " T "
+0000000000401196 T main
+</code></pre>
+      <ul class="dense">
+        <li><code>file</code> : un exécutable x86-64 <strong>lié dynamiquement</strong>. Il utilise la bibliothèque C du système (<code>printf</code>, <code>scanf</code>…)</li>
+        <li><code>strings</code> : les messages affichés trahissent le rôle du programme. Ici, un contrôle d'accès</li>
+        <li><code>nm</code> : la liste des <strong>symboles</strong> (noms de fonctions et de variables). <code>T</code> désigne une fonction du code</li>
+      </ul>
+      <p class="petit muet">Un binaire peut être <strong>« strippé »</strong> (<code>strip</code>) : ses symboles sont supprimés et <code>nm</code> n'affiche plus rien. L'analyse reste possible, mais plus longue.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Trouver le code PIN</h2>
+    <div class="corps">
+      <div class="colonnes texte-code" style="grid-template-columns: .85fr 1.3fr;">
+        <div class="dense">
+          <ul>
+            <li><code>scanf</code> range le nombre saisi en <code>[rbp-0xc]</code></li>
+            <li>Ce nombre est comparé à <code>0x1092</code></li>
+            <li>S'il est différent (<code>jne</code>), on saute au message « Accès refusé »</li>
+          </ul>
+          <div class="encadre marine"><code>0x1092</code> = 4096 + 144 + 2 = <strong>4242</strong> : le code PIN.</div>
+          <p class="petit muet">Les lignes <code>fs:0x28</code> du début et de la fin de <code>main</code> sont le <strong>canari</strong> de pile, une protection présentée plus loin.</p>
+        </div>
+        <pre class="mini" data-titre="objdump -d -M intel --no-show-raw-insn pin (extrait)" data-extrait><code class="language-x86asm" data-trim>
+4011c5:  lea    rax,[rbp-0xc]
+4011c9:  mov    rsi,rax
+4011cc:  lea    rax,[rip+0xe3d]   # "%d"
+4011d3:  mov    rdi,rax
+4011d6:  mov    eax,0x0
+4011db:  call   4010a0 &lt;__isoc99_scanf@plt&gt;
+4011e0:  cmp    eax,0x1
+4011e3:  je     4011ec &lt;main+0x56&gt;
+  ...
+4011ec:  mov    eax,DWORD PTR [rbp-0xc]
+4011ef:  cmp    eax,0x1092
+4011f4:  jne    40120c &lt;main+0x76&gt;
+4011f6:  lea    rax,[rip+0xe16]   # "Accès autorisé"
+4011fd:  mov    rdi,rax
+401200:  call   401070 &lt;puts@plt&gt;
+</code></pre>
+      </div>
+    </div>
+    <aside class="notes">
+      Les commentaires # "%d" et # "Accès autorisé" sont ajoutés par moi : objdump affiche seulement l'adresse (402010, 402013). On les retrouve avec x/s dans GDB.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Un secret dans un binaire n'est jamais caché</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p class="ko">✗ Ce qu'il ne faut pas faire</p>
+          <ul class="dense">
+            <li>Écrire un mot de passe, une clé d'API ou un jeton dans le code source</li>
+            <li>Le « cacher » par un XOR, un encodage en base64 ou un découpage en morceaux</li>
+            <li>Compter sur la compilation pour le rendre illisible</li>
+          </ul>
+        </div>
+        <div>
+          <p class="ok">✓ Ce qu'il faut faire</p>
+          <ul class="dense">
+            <li>Vérifier le mot de passe <strong>sur un serveur</strong>, jamais sur la machine de l'utilisateur</li>
+            <li>Ne stocker qu'une <strong>empreinte</strong> (<em>hash</em>) salée du mot de passe, calculée avec un algorithme lent conçu pour cela (Argon2, bcrypt)</li>
+            <li>Ranger les clés d'API dans des variables d'environnement ou un coffre-fort de secrets</li>
+          </ul>
+        </div>
+      </div>
+      <div class="encadre marine" style="margin-top: 10px;">
+        Tout ce que le processeur peut lire, un analyste peut le lire aussi. Le défi crackme du TP3 vous le fera constater.
+      </div>
+      <p class="petit muet">Une <strong>empreinte</strong> est le résultat d'une fonction à sens unique : on ne peut pas retrouver le mot de passe à partir d'elle. Le <strong>sel</strong> est une valeur aléatoire ajoutée avant le calcul, pour que deux mots de passe identiques n'aient pas la même empreinte.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #4 LE DÉPASSEMENT DE TAMPON                                        -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#4</div>
+    <h2>Le dépassement de tampon</h2>
+    <div class="sous-titre">Débogage et rétro-ingénierie</div>
+  </section>
+
+  <section>
+    <h2>Un programme vulnérable</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <div>
+          <pre class="mini" data-titre="overflow.c" data-extrait><code class="language-c" data-trim>
+#include &lt;stdio.h&gt;
+void greet(void)
+{
+    char name[16];
+    printf("Votre prénom : ");
+    scanf("%s", name);   /* DANGEREUX */
+    printf("Bonjour, %s !\n", name);
+}
+int main(void)
+{
+    greet();
+    return 0;
+}
+</code></pre>
+        </div>
+        <div class="dense">
+          <p><strong>La pile de <code>greet</code></strong></p>
+          <table class="indices" style="width: 100%;">
+            <tr><th>Adresse</th><th>Contenu</th></tr>
+            <tr><td><code>rbp + 8</code></td><td><strong>adresse de retour</strong> vers <code>main</code></td></tr>
+            <tr><td><code>rbp</code></td><td><code>rbp</code> sauvegardé</td></tr>
+            <tr class="car"><td><code>rbp − 16</code></td><td><code>name</code> (16 octets)</td></tr>
+          </table>
+          <p class="petit"><code>scanf</code> écrit vers les adresses <strong>hautes</strong>. Après 16 caractères, elle écrase le <code>rbp</code> sauvegardé, puis l'adresse de retour.</p>
+          <p class="ko">✗ Ne jamais lire une saisie sans limiter sa taille.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Compilé sans protection : gcc -O0 -no-pie -fno-stack-protector. Dans greet, name est en [rbp-0x10] (vu avec objdump).
+    </aside>
+  </section>
+
+  <section>
+    <h2>Écraser l'adresse de retour</h2>
+    <div class="corps">
+      <pre class="terminal compact" data-titre="Terminal"><code class="language-plaintext" data-trim>
+$ ./overflow
+Votre prénom : Cosmo
+Bonjour, Cosmo !
+$ ./overflow
+Votre prénom : AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Bonjour, AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA !
+Segmentation fault (core dumped)
+</code></pre>
+      <ul class="dense">
+        <li>Les 40 « A » (<code>0x41</code>) remplissent <code>name</code>, écrasent <code>rbp</code> puis l'adresse de retour</li>
+        <li>Au <code>ret</code> de <code>greet</code>, le processeur veut sauter à <code>0x4141414141414141</code> : adresse invalide, le noyau tue le programme</li>
+        <li>Avec des octets choisis au lieu de « A », un attaquant <strong>choisit où le programme saute</strong> : il prend le contrôle de <code>rip</code></li>
+      </ul>
+      <p class="petit muet" style="margin: 0;">Dans GDB, au moment du plantage, <code>x/xg $rsp</code> montre la fausse adresse de retour : <code>0x4141414141414141</code>.</p>
+    </div>
+    <aside class="notes">
+      C'est l'attaque décrite dès 1996 dans « Smashing the Stack for Fun and Profit ». Elle est toujours d'actualité dans les logiciels écrits en C et C++.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Les protections modernes</h2>
+    <div class="corps">
+      <table class="serre">
+        <tr><th>Protection</th><th>Principe</th><th>Effet sur l'attaque</th></tr>
+        <tr><td><strong>Canari de pile</strong></td><td>une valeur aléatoire placée avant l'adresse de retour, vérifiée avant <code>ret</code></td><td>le programme s'arrête : <code>*** stack smashing detected ***</code></td></tr>
+        <tr><td><strong>NX</strong> (pile non exécutable)</td><td>la pile et les données ne peuvent pas être exécutées</td><td>impossible d'exécuter du code injecté</td></tr>
+        <tr><td><strong>ASLR</strong></td><td>la pile, le tas et les bibliothèques changent d'adresse à chaque lancement</td><td>l'attaquant ne sait plus où sauter</td></tr>
+        <tr><td><strong>PIE</strong></td><td>le programme lui-même est chargé à une adresse aléatoire</td><td>même effet pour le code du programme</td></tr>
+      </table>
+      <div class="encadre marine" style="margin-top: 14px;">
+        Ces protections compliquent l'attaque sans corriger le bogue. La vraie solution : limiter les saisies (<code>scanf("%15s", name)</code>, <code>fgets</code>) ou utiliser un langage qui vérifie les bornes (Rust, Python…).
+      </div>
+      <p class="petit muet">Pour simplifier, les crackmes et démonstrations du module sont compilés sans PIE et GDB désactive l'ASLR : les adresses sont toujours les mêmes.</p>
+    </div>
+    <aside class="notes">
+      Démonstration : overflow-protected (compilé avec -fstack-protector-all) affiche « stack smashing detected » et renvoie 134 (SIGABRT).
+      Les techniques de contournement (ROP, fuites d'adresses) sont pour le mastère.
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #5 LE CADRE LÉGAL                                                  -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#5</div>
+    <h2>Le cadre légal</h2>
+    <div class="sous-titre">Débogage et rétro-ingénierie</div>
+  </section>
+
+  <section>
+    <h2>Ce que dit la loi française</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul class="dense">
+            <li>La <strong>décompilation</strong> d'un logiciel est autorisée, même contre l'avis de sa licence, lorsqu'elle est indispensable à son <strong>interopérabilité</strong> avec un autre logiciel, sous conditions (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044365559" target="_blank">article L122-6-1 du Code de la propriété intellectuelle</a>)</li>
+            <li>En dehors de ce cadre, reproduire ou analyser le logiciel d'autrui sans son accord peut constituer une <strong>contrefaçon</strong></li>
+            <li>Accéder ou se maintenir <strong>frauduleusement</strong> dans un système informatique est un délit : jusqu'à 3 ans de prison et 100 000 € d'amende (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000030939438" target="_blank">article 323-1 du Code pénal</a>)</li>
+          </ul>
+        </div>
+        <div>
+          <div class="encadre marine">
+            N'analysez que des programmes que vous avez <strong>le droit d'analyser</strong> : les vôtres, ceux du cours, les épreuves de CTF, ou dans le cadre d'une mission autorisée par écrit.
+          </div>
+          <p class="petit" style="margin-top: 14px;">Pour s'entraîner légalement : <a href="https://www.root-me.org/" target="_blank">Root-Me</a> (plateforme française), <a href="https://picoctf.org/" target="_blank">picoCTF</a>, <a href="https://crackmes.one/" target="_blank">crackmes.one</a>.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Insister : la compétence est la même pour l'analyste et pour l'attaquant. Ce qui les sépare, c'est l'autorisation.
+    </aside>
+  </section>
+
+  <section>
+    <h2>À retenir</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <ul class="dense">
+          <li>GDB : <code>break *adresse</code>, <code>ni</code>, <code>finish</code>, <code>disassemble</code>, <code>watch</code>, et <code>set</code> pour modifier registres et mémoire</li>
+          <li><code>gcc -S -masm=intel</code> montre l'assembleur produit : prologue, variables locales sous <code>rbp</code>, épilogue</li>
+          <li>Les compilateurs remplacent les multiplications et divisions par des décalages et des multiplications</li>
+        </ul>
+        <ul class="dense">
+          <li>Analyse : <code>file</code>, <code>strings</code>, <code>nm</code>, puis <code>objdump</code>, puis GDB</li>
+          <li>Un secret écrit dans un binaire n'est jamais caché</li>
+          <li>Dépassement de tampon : écraser l'adresse de retour pour contrôler <code>rip</code> ; canari, NX, ASLR et PIE compliquent l'attaque</li>
+          <li>N'analysez que ce que vous avez le droit d'analyser</li>
+        </ul>
+      </div>
+      <div class="encadre marine" style="margin-top: 14px;">À vous : le <strong>TP3 – Le défi crackme</strong>.</div>
+    </div>
+  </section>
+
+  <section data-layout="titre">
+    <h1>Des questions ?</h1>
+    <div class="sous-titre">
+      Chris CHEVALIER<br>
+      chris.chevalier@ecole-hexagone.com
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="../assets/vendor/reveal/dist/reveal.js"></script>
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/vendor/reveal/plugin/notes/notes.js"></script>
+<script src="../assets/js/hexagone.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TP3 – Le défi crackme – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/css/enonce.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="panneau"><img src="../assets/charte/logo-hexagone.png" alt="École Hexagone"></div>
+  <div class="titre">
+    <h1>TP3 – Le défi crackme</h1>
+    <p><span class="code-module">2ASSE</span> – Architecture bas niveau et assembleur · Vendredi 4 décembre</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="encadre marine">
+    <span class="intitule">Ce TP en bref</span>
+    <ul>
+      <li><strong>Objectif</strong> : retrouver les mots de passe de trois programmes dont vous n'avez <strong>pas le code source</strong>, avec <code>strings</code>, <code>objdump</code> et GDB.</li>
+      <li>Les trois programmes, <code>crackme1</code>, <code>crackme2</code> et <code>crackme3</code>, sont dans le dossier <code>tp3/</code> de votre dépôt. Vos réponses vont dans <code>tp3/answers.md</code>.</li>
+      <li>Ce qui est noté, c'est votre <strong>démarche</strong> : les commandes lancées, les adresses et valeurs observées, votre raisonnement. Un mot de passe sans démarche ne rapporte rien.</li>
+      <li>Le TP3 compte pour <strong>25 %</strong> de la note du module. Rendu au plus tard le <strong>dimanche 6 décembre à 23h59</strong>.</li>
+    </ul>
+  </div>
+
+  <div class="encadre">
+    <span class="intitule">Règles du jeu</span>
+    <ul>
+      <li>Ces programmes ont été écrits pour cet exercice : vous avez le droit de les analyser. N'appliquez jamais ces techniques à un logiciel ou à un système sans autorisation écrite.</li>
+      <li>Ne communiquez pas les mots de passe aux autres étudiants. Expliquer une commande, oui ; donner une solution, non.</li>
+      <li>L'IA est autorisée pour vous expliquer une instruction ou une commande. Le compte rendu doit décrire <strong>ce que vous avez fait et observé</strong>.</li>
+    </ul>
+  </div>
+
+  <nav class="sommaire">
+    <a href="#etape-0"><span class="n">Étape 0</span><br>Préparer l'analyse</a>
+    <a href="#niveau-1"><span class="n">Niveau 1</span><br>En clair</a>
+    <a href="#niveau-2"><span class="n">Niveau 2</span><br>Masqué</a>
+    <a href="#niveau-3"><span class="n">Niveau 3</span><br>La clé personnelle</a>
+    <a href="#contourner"><span class="n">Étape 4</span><br>Contourner</a>
+    <a href="#bonus"><span class="n">Bonus</span><br>Pour aller plus loin</a>
+  </nav>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-0">
+    <h2><span class="num">0</span> Préparer l'analyse</h2>
+    <div class="meta"><span class="etiquette clair">Codespace · terminal</span></div>
+
+    <ol>
+      <li>Rouvrez votre Codespace depuis <a href="https://github.com/codespaces" target="_blank">github.com/codespaces</a>, puis placez-vous dans le dossier du TP : <code>cd tp3</code>.</li>
+      <li>Lancez une première fois chaque programme pour voir ce qu'il demande, par exemple <code>./crackme1</code>. Le fichier <code>answers.md</code> du dossier liste ce qu'il faut rendre.</li>
+      <li>Gardez sous la main les commandes du cours :</li>
+    </ol>
+    <table class="compact">
+      <tr><th>Commande</th><th>Ce qu'elle montre</th></tr>
+      <tr><td><code>file crackme1</code></td><td>le type de fichier et l'architecture</td></tr>
+      <tr><td><code>strings crackme1</code></td><td>les suites de caractères lisibles</td></tr>
+      <tr><td><code>nm crackme1</code></td><td>les noms des fonctions et des variables (les symboles)</td></tr>
+      <tr><td><code>objdump -d -M intel --no-show-raw-insn crackme1 | less</code></td><td>le code désassemblé (<kbd>/</kbd> pour chercher, <kbd>q</kbd> pour quitter)</td></tr>
+      <tr><td><code>gdb -q ./crackme1</code></td><td>l'analyse dynamique : <code>break</code>, <code>run</code>, <code>ni</code>, <code>finish</code>, <code>x</code>, <code>info registers</code></td></tr>
+    </table>
+    <p class="muet" style="font-size: 14px;">Ces programmes sont écrits en C et compilés avec <code>gcc</code>. Vous y verrez des appels à des fonctions de la bibliothèque C, comme <code>strcmp@plt</code> (comparer deux chaînes) ou <code>strlen@plt</code> (longueur d'une chaîne). Le suffixe <code>@plt</code> signale une fonction d'une bibliothèque partagée.</p>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="niveau-1">
+    <h2><span class="num">1</span> Niveau 1 – En clair</h2>
+    <div class="meta"><span class="etiquette clair">strings · GDB</span></div>
+
+    <p>Trouvez le mot de passe de <code>crackme1</code>, puis le drapeau qu'il affiche quand on lui donne le bon mot de passe. Un drapeau a la forme <code>HEX{…}</code>.</p>
+    <p>Une fois le mot de passe trouvé, <strong>confirmez-le dans GDB</strong> : arrêtez-vous à l'entrée de la fonction de vérification et affichez les deux chaînes qu'elle compare.</p>
+
+    <h3>Question</h3>
+    <p><strong>Q1.</strong> Décrivez votre démarche : les commandes lancées et ce qu'elles vous ont appris.</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li><code>strings</code> affiche beaucoup de lignes : cherchez celles qui ressemblent à un message ou à un mot de passe.</li>
+        <li><code>nm crackme1</code> montre une fonction <code>check</code>. Désassemblez-la : elle appelle <code>strcmp</code>.</li>
+        <li>D'après la convention d'appel, <code>strcmp</code> reçoit ses deux chaînes dans <code>rdi</code> et <code>rsi</code>. <code>break strcmp</code>, puis <code>x/s $rdi</code> et <code>x/s $rsi</code>.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./crackme1</code> affiche « Bravo » et un drapeau avec votre mot de passe ;</li>
+        <li>votre démarche cite au moins une commande d'analyse statique et une observation faite dans GDB ;</li>
+        <li>votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="niveau-2">
+    <h2><span class="num">2</span> Niveau 2 – Masqué</h2>
+    <div class="meta"><span class="etiquette clair">objdump · XOR · x</span></div>
+
+    <p>Cette fois, <code>strings</code> ne révèle ni le mot de passe ni le drapeau. Lisez le code de la fonction de vérification de <code>crackme2</code> pour comprendre comment il compare votre saisie, retrouvez le mot de passe, puis le drapeau.</p>
+    <p>Le <strong>OU exclusif</strong> (XOR, instruction <code>xor</code>) compare deux bits : le résultat vaut 1 quand ils sont différents. Il a une propriété utile : <code>(a XOR k) XOR k = a</code>. Appliquer deux fois la même clé redonne la valeur de départ.</p>
+
+    <h3>Question</h3>
+    <p><strong>Q2.</strong> Décrivez votre démarche : l'adresse de la fonction de vérification, la longueur attendue, la clé utilisée, les octets comparés et la façon dont vous les avez décodés.</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Le premier test de <code>check</code> porte sur le résultat de <code>strlen</code> : il donne la longueur du mot de passe.</li>
+        <li>Repérez l'instruction <code>xor</code> et sa valeur, puis l'étiquette <code>secret</code> que <code>objdump</code> affiche en commentaire.</li>
+        <li><code>x/10xb &amp;secret</code> dans GDB (ou <code>objdump -s -j .rodata crackme2</code>) affiche les octets du secret.</li>
+        <li>Pour décoder, appliquez la clé à chaque octet. À la main avec la table ASCII, ou en Python : <code>bytes(b ^ 0x.. for b in [0x.., 0x..])</code>.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./crackme2</code> affiche « Bravo » et un drapeau avec votre mot de passe ;</li>
+        <li>votre démarche explique pourquoi <code>strings</code> ne suffisait pas et cite la clé et les octets du secret ;</li>
+        <li>votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="niveau-3">
+    <h2><span class="num">3</span> Niveau 3 – La clé personnelle</h2>
+    <div class="meta"><span class="etiquette clair">Rétro-ingénierie d'un algorithme</span></div>
+
+    <p><code>crackme3</code> demande un <strong>identifiant</strong> puis une <strong>clé</strong>, calculée à partir de l'identifiant par la fonction <code>compute_key</code>. Il n'y a pas un mot de passe à trouver, mais un <strong>algorithme</strong> à comprendre.</p>
+    <ol>
+      <li>Désassemblez <code>compute_key</code> et traduisez-la en pseudo-code : valeur de départ, boucle, calcul fait pour chaque caractère, calcul final.</li>
+      <li>Calculez la clé de <strong>votre prénom</strong>, écrit sans accent (par exemple <code>Manon</code>), et celle de l'identifiant <code>Hexagone</code>. Vérifiez-les avec <code>./crackme3</code>.</li>
+    </ol>
+
+    <h3>Questions</h3>
+    <p><strong>Q3.</strong> Écrivez l'algorithme de <code>compute_key</code> en pseudo-code.</p>
+    <p><strong>Q4.</strong> Donnez la clé de votre prénom et celle de <code>Hexagone</code>.</p>
+    <p><strong>Q5.</strong> Que calculent les instructions <code>shl rax, 0x5</code> puis <code>sub rax, rdx</code> ? Et le bloc qui commence par <code>movabs rdx, 0x431bde82d7b634db</code> ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Les variables locales sont sous <code>rbp</code> : repérez celle qui reçoit une valeur de départ et celle qui sert d'indice.</li>
+        <li>Revoyez les astuces des compilateurs : un décalage à gauche de 5 bits multiplie par 32.</li>
+        <li>Le calcul final contient la constante <code>0xf4240</code>. Convertissez-la en décimal : une multiplication par une grande constante suivie d'un décalage remplace une division.</li>
+        <li>Pour tester vos hypothèses, posez un point d'arrêt à la fin de <code>compute_key</code> (sur son <code>ret</code>) et lisez <code>rax</code>.</li>
+        <li>Un petit programme Python qui reproduit l'algorithme (un <em>keygen</em>) fait gagner du temps. Attention : les calculs du processeur se font sur 64 bits.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./crackme3</code> accepte votre prénom avec votre clé, et <code>Hexagone</code> avec la sienne ;</li>
+        <li>votre pseudo-code permettrait à quelqu'un d'autre de calculer la clé de n'importe quel identifiant ;</li>
+        <li>votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="contourner">
+    <h2><span class="num">4</span> Contourner sans le mot de passe</h2>
+    <div class="meta"><span class="etiquette clair">GDB · set</span></div>
+
+    <p>Lancez <code>crackme1</code> dans GDB et faites-lui afficher « Bravo » en tapant un <strong>mauvais</strong> mot de passe, sans modifier le fichier.</p>
+
+    <h3>Questions</h3>
+    <p><strong>Q6.</strong> Notez les commandes GDB que vous avez utilisées et expliquez pourquoi elles fonctionnent.</p>
+    <p><strong>Q7.</strong> Qu'auraient dû faire les auteurs de ces trois programmes pour protéger réellement leur mot de passe ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li><code>check</code> renvoie son résultat dans <code>eax</code> : 1 si le mot de passe est bon, 0 sinon.</li>
+        <li><code>finish</code> termine la fonction en cours et s'arrête juste après son <code>call</code>. <code>set $eax = 1</code> change le résultat.</li>
+        <li>Revoyez ce que le cours dit des secrets écrits dans un binaire et des empreintes de mots de passe.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li>« Bravo » s'affiche dans GDB alors que le mot de passe tapé est faux ;</li>
+        <li>Q7 parle de l'endroit où vérifier un mot de passe et de la façon de le stocker ;</li>
+        <li>votre dernier commit est poussé avant le <strong>dimanche 6 décembre à 23h59</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="bonus">
+    <h2><span class="num">+</span> Pour aller plus loin</h2>
+
+    <h3>Le dépassement de tampon du cours</h3>
+    <p>Recopiez <code>overflow.c</code> du cours dans <code>tp3/</code>, compilez-le avec <code>gcc -O0 -no-pie -fno-stack-protector -g overflow.c -o overflow</code>, puis :</p>
+    <ol>
+      <li>trouvez le nombre exact de caractères qui fait planter le programme ;</li>
+      <li>dans GDB, au moment du plantage, affichez la fausse adresse de retour avec <code>x/xg $rsp</code> ;</li>
+      <li>recompilez sans <code>-fno-stack-protector</code> et observez la différence.</li>
+    </ol>
+    <p class="muet" style="font-size: 14px;">Ce programme contient volontairement une faille : ne réutilisez jamais <code>scanf("%s", …)</code> dans un vrai programme.</p>
+
+    <h3>Défi – Entraînez-vous</h3>
+    <p>Créez un compte sur <a href="https://www.root-me.org/" target="_blank">Root-Me</a> et résolvez les premières épreuves de la catégorie <strong>Cracking</strong>. La plateforme est française et légale.</p>
+  </section>
+
+</main>
+
+<footer class="pied">Chris CHEVALIER · 2ASSE – Architecture bas niveau et assembleur · École Hexagone</footer>
+
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/js/enonce.js"></script>
+</body>
+</html>
