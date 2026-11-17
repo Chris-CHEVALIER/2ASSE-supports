@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TP2 – Boucles, tableaux et fonctions – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/css/enonce.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="panneau"><img src="../assets/charte/logo-hexagone.png" alt="École Hexagone"></div>
+  <div class="titre">
+    <h1>TP2 – Boucles, tableaux et fonctions</h1>
+    <p><span class="code-module">2ASSE</span> – Architecture bas niveau et assembleur · Jeudi 3 décembre</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="encadre marine">
+    <span class="intitule">Ce TP en bref</span>
+    <ul>
+      <li><strong>Objectifs</strong> : parcourir un tableau avec une boucle, prendre des décisions avec <code>cmp</code> et les sauts conditionnels, écrire des fonctions avec <code>call</code> et <code>ret</code>, afficher un nombre et lire une saisie au clavier.</li>
+      <li>Les programmes vont dans le dossier <code>tp2/</code> de votre dépôt. Les réponses aux questions <strong>Q1 à Q6</strong> vont dans <code>tp2/answers.md</code>.</li>
+      <li>Faites un commit et poussez-le à <strong>chaque étape terminée</strong>. Le TP2 compte pour <strong>20 %</strong> de la note du module. Rendu au plus tard le <strong>dimanche 6 décembre à 23h59</strong>.</li>
+    </ul>
+  </div>
+
+  <nav class="sommaire">
+    <a href="#etape-0"><span class="n">Étape 0</span><br>Reprendre son Codespace</a>
+    <a href="#etape-1"><span class="n">Étape 1</span><br>La moyenne</a>
+    <a href="#etape-2"><span class="n">Étape 2</span><br>Maximum et comptage</a>
+    <a href="#etape-3"><span class="n">Étape 3</span><br>Afficher un nombre</a>
+    <a href="#etape-4"><span class="n">Étape 4</span><br>Le bilan</a>
+    <a href="#etape-5"><span class="n">Étape 5</span><br>Saluer</a>
+    <a href="#bonus"><span class="n">Bonus</span><br>Pour aller plus loin</a>
+  </nav>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-0">
+    <h2><span class="num">0</span> Reprendre son Codespace</h2>
+    <div class="meta"><span class="etiquette clair">Codespaces · GitHub</span></div>
+
+    <ol>
+      <li>Ouvrez <a href="https://github.com/codespaces" target="_blank">github.com/codespaces</a> et rouvrez le Codespace de votre dépôt <code>2asse-nom-prenom</code>. N'en créez pas un nouveau.</li>
+      <li>Dans le terminal, placez-vous dans le dossier du TP : <code>cd tp2</code>. Le fichier <code>answers.md</code> y est déjà, avec les questions Q1 à Q6 à compléter.</li>
+      <li>Vérifiez que <code>make</code>, <code>nasm</code> et <code>gdb</code> répondent. Sinon, lancez <code>bash ../.devcontainer/install.sh</code>.</li>
+    </ol>
+    <p class="muet" style="font-size: 14px;">Si vous travaillez sur un autre Codespace ou un autre ordinateur, récupérez d'abord vos commits avec <strong>Synchroniser les modifications</strong> (ou <code>git pull</code>).</p>
+
+    <p>Les étapes 1 à 4 utilisent toutes le même tableau de notes. Recopiez-le au début de chaque programme :</p>
+    <pre data-titre="section .data commune aux étapes 1 à 4"><code class="language-x86asm">
+      section .data
+          grades  dq 12, 15, 9, 17, 14, 8
+          count   equ 6
+    </code></pre>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-1">
+    <h2><span class="num">1</span> La moyenne</h2>
+    <div class="meta"><span class="etiquette clair">Boucle · adressage indexé · div</span></div>
+
+    <p>Écrivez le programme <code>average.asm</code>. Il additionne les six notes avec une boucle, puis divise la somme par <code>count</code>. Il renvoie la <strong>moyenne entière</strong> comme code de retour.</p>
+    <ul>
+      <li>La boucle doit fonctionner pour n'importe quel tableau : si l'on ajoute une note et que l'on met à jour <code>count</code>, rien d'autre ne change.</li>
+      <li>La division entière <code>div rbx</code> divise le nombre formé par <code>rdx</code> et <code>rax</code> par <code>rbx</code> : le quotient arrive dans <code>rax</code>, le reste dans <code>rdx</code>.</li>
+    </ul>
+
+    <h3>Question</h3>
+    <p><strong>Q1.</strong> Que contient <code>rdx</code> après la division ? Pourquoi faut-il le mettre à zéro avant <code>div</code> ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Repartez de <code>sum.asm</code>, vu en cours : <code>add rax, [grades + rcx*8]</code> lit l'élément n° <code>rcx</code>.</li>
+        <li><code>div</code> n'accepte pas de valeur immédiate : mettez d'abord <code>count</code> dans un registre.</li>
+        <li>Pour lire <code>rdx</code> après la division, utilisez GDB (<code>p $rdx</code>).</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./average</code> renvoie <code>12</code> (75 / 6) ;</li>
+        <li>en ajoutant la note 20 (<code>count equ 7</code>), il renvoie <code>13</code> (95 / 7) sans autre modification ;</li>
+        <li>Q1 est répondue et votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-2">
+    <h2><span class="num">2</span> Maximum et comptage</h2>
+    <div class="meta"><span class="etiquette clair">cmp · sauts conditionnels</span></div>
+
+    <h3><code>max.asm</code> – La meilleure note</h3>
+    <p>Écrivez le programme <code>max.asm</code>. Il renvoie la plus grande note du tableau. Partez de la première note comme maximum provisoire, puis comparez-la à chacune des suivantes.</p>
+
+    <h3><code>count.asm</code> – Les notes validées</h3>
+    <p>Écrivez le programme <code>count.asm</code>. Il renvoie le nombre de notes <strong>supérieures ou égales à 10</strong>.</p>
+
+    <h3>Question</h3>
+    <p><strong>Q2.</strong> Dans une copie de <code>max.asm</code>, ajoutez la note <code>-5</code> à la fin du tableau (et passez <code>count</code> à 7), puis remplacez votre saut conditionnel signé par son équivalent non signé (<code>jle</code> devient <code>jbe</code>, <code>jg</code> devient <code>ja</code>…). Quel code de retour obtenez-vous ? Pourquoi ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Un « si » en assembleur saute <strong>par-dessus</strong> le bloc à ne pas exécuter : testez la condition inverse.</li>
+        <li><code>cmp qword [grades + rcx*8], 10</code> compare directement une case du tableau à 10. <code>qword</code> précise la taille de la case.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./max</code> renvoie <code>17</code> et <code>./count</code> renvoie <code>4</code> ;</li>
+        <li>vos programmes donnent encore le bon résultat si la meilleure note est la première ou la dernière du tableau ;</li>
+        <li>Q2 est répondue et votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-3">
+    <h2><span class="num">3</span> Afficher un nombre</h2>
+    <div class="meta"><span class="etiquette clair">Fonction · call · ret · div</span></div>
+
+    <p>Le code de retour ne va que jusqu'à 255. Il est temps d'<strong>afficher</strong> les nombres. Écrivez, dans le programme <code>number.asm</code>, la fonction <code>print_uint</code> :</p>
+    <ul>
+      <li>elle reçoit dans <code>rdi</code> un entier <strong>non signé</strong> de 64 bits ;</li>
+      <li>elle l'affiche en décimal, suivi d'un saut de ligne ;</li>
+      <li>elle se termine par <code>ret</code>.</li>
+    </ul>
+    <p>Pour découper le nombre en chiffres, on le divise par 10 tant qu'il n'est pas nul : chaque <strong>reste</strong> donne un chiffre, <strong>en commençant par les unités</strong>.
+      Rangez les caractères dans un tampon réservé en <code>.bss</code> :</p>
+    <pre data-titre="tp2/number.asm – section .bss"><code class="language-x86asm">
+      section .bss
+          digits  resb 21             ; 20 chiffres au plus + le saut de ligne
+    </code></pre>
+    <p>Testez votre fonction dans <code>_start</code> en l'appelant quatre fois, avec 0, 7, 42 puis 1234567 :</p>
+    <pre data-titre="Affichage attendu"><code class="language-plaintext">
+      0
+      7
+      42
+      1234567
+    </code></pre>
+
+    <h3>Question</h3>
+    <p><strong>Q3.</strong> Pourquoi est-il pratique de remplir le tampon <code>digits</code> en partant de la fin ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Gardez dans un registre (par exemple <code>r8</code>) l'adresse de la prochaine case à remplir. Placez d'abord le saut de ligne en <code>digits + 20</code>, puis reculez d'une case par chiffre.</li>
+        <li>Le reste d'une division par 10 est entre 0 et 9 : ajoutez <code>'0'</code> pour obtenir le caractère.</li>
+        <li>Une boucle « répéter… tant que » (test en bas) affiche bien <code>0</code> pour le nombre 0.</li>
+        <li>À la fin, <code>r8</code> pointe sur le premier chiffre : la longueur à afficher est <code>digits + 21 - r8</code>.</li>
+        <li>Définissez la fonction <strong>avant</strong> <code>_start</code> ou après la sortie du programme : le processeur ne doit pas « tomber » dedans par erreur.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./number</code> affiche exactement les quatre lignes attendues ;</li>
+        <li><code>print_uint</code> affiche aussi correctement 18446744073709551615 (<code>mov rdi, -1</code>), le plus grand entier non signé de 64 bits ;</li>
+        <li>Q3 est répondue et votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-4">
+    <h2><span class="num">4</span> Le bilan</h2>
+    <div class="meta"><span class="etiquette clair">Plusieurs fonctions · convention d'appel · pile</span></div>
+
+    <p>Écrivez le programme <code>report.asm</code>, qui affiche le bilan des notes :</p>
+    <pre data-titre="Affichage attendu"><code class="language-plaintext">
+      Somme : 75
+      Maximum : 17
+      Moyenne : 12
+    </code></pre>
+    <p>Organisez-le en <strong>quatre fonctions</strong>, qui respectent la convention d'appel du cours (arguments dans <code>rdi</code>, <code>rsi</code>, <code>rdx</code>, résultat dans <code>rax</code>) :</p>
+    <table class="compact">
+      <tr><th>Fonction</th><th>Rôle</th></tr>
+      <tr><td><code>print_string</code></td><td>affiche <code>rdx</code> octets à partir de l'adresse <code>rsi</code></td></tr>
+      <tr><td><code>print_uint</code></td><td>celle de l'étape 3</td></tr>
+      <tr><td><code>sum</code></td><td>renvoie dans <code>rax</code> la somme des notes</td></tr>
+      <tr><td><code>maximum</code></td><td>renvoie dans <code>rax</code> la plus grande note</td></tr>
+    </table>
+    <p>Les textes <code>Somme : </code>, <code>Maximum : </code> et <code>Moyenne : </code> sont déclarés dans la section <code>.data</code>, avec leur longueur.</p>
+
+    <h3>Questions</h3>
+    <p><strong>Q4.</strong> Ouvrez <code>report</code> dans GDB et arrêtez-vous au premier appel de <code>print_uint</code> (<code>break print_uint</code>, puis <code>run</code>).
+      Quelle adresse se trouve au sommet de la pile (<code>x/xg $rsp</code>) ? À quelle instruction correspond-elle (<code>x/i</code> suivi de cette adresse) ? Pourquoi ?</p>
+    <p><strong>Q5.</strong> <code>print_uint</code> modifie <code>rcx</code>, <code>rdx</code> et <code>r8</code> sans les sauvegarder. Où <code>_start</code> doit-il garder la somme pour qu'elle survive aux appels ? Justifiez avec la convention d'appel.</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Une fonction peut en appeler une autre : <code>print_uint</code> peut se terminer par un appel à <code>print_string</code>.</li>
+        <li>Rappelez-vous les registres que la convention System V oblige une fonction à <strong>préserver</strong>.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./report</code> affiche exactement les trois lignes attendues ;</li>
+        <li>chaque fonction est précédée d'un commentaire qui dit ce qu'elle reçoit et ce qu'elle renvoie ;</li>
+        <li>Q4 et Q5 sont répondues et votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-5">
+    <h2><span class="num">5</span> Saluer</h2>
+    <div class="meta"><span class="etiquette clair">Appel système read · tampon</span></div>
+
+    <p>Écrivez le programme <code>greet.asm</code>. Il demande un prénom, le lit au clavier, puis salue la personne :</p>
+    <pre data-titre="Terminal"><code class="language-plaintext">
+      $ ./greet
+      Votre prénom : Cosmo
+      Bonjour, Cosmo !
+    </code></pre>
+    <ul>
+      <li>Le prénom est lu par l'appel système <code>read</code> dans un tampon <code>name</code> de <strong>32 octets</strong>, réservé en <code>.bss</code>.</li>
+      <li>Le saut de ligne tapé avec <kbd>Entrée</kbd> fait partie de la saisie : ne l'affichez pas avant le « ! ».</li>
+    </ul>
+
+    <h3>Question</h3>
+    <p><strong>Q6.</strong> Lancez <code>./greet</code> et saisissez un prénom de plus de 32 caractères qui se termine par <code>whoami</code>, par exemple <code>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwhoami</code>.
+      Que se passe-t-il après la fin du programme ? Pourquoi est-ce un problème de sécurité ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li><code>read</code> renvoie dans <code>rax</code> le nombre d'octets lus. Si le dernier est un saut de ligne (10), retirez-le de la longueur.</li>
+        <li><code>cmp byte [name + rbx - 1], 10</code> compare le dernier octet lu (si <code>rbx</code> contient la longueur) au saut de ligne.</li>
+        <li>Réutilisez <code>print_string</code> de l'étape 4.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li>le programme salue correctement <code>Cosmo</code>, <code>Manon</code> et un prénom d'une seule lettre ;</li>
+        <li>la taille maximale passée à <code>read</code> ne dépasse jamais la taille du tampon ;</li>
+        <li>Q6 est répondue et votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="bonus">
+    <h2><span class="num">+</span> Pour aller plus loin</h2>
+
+    <h3><code>factorial.asm</code> – Une fonction récursive</h3>
+    <p>Écrivez la fonction <code>factorial</code>, qui renvoie dans <code>rax</code> la factorielle de <code>rdi</code> (<code>n! = n × (n − 1)!</code>, avec <code>0! = 1! = 1</code>), en s'appelant elle-même.
+      Affichez <code>10!</code> avec <code>print_uint</code> : <code>3628800</code>.</p>
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Avant l'appel récursif, sauvegardez <code>n</code> sur la pile avec <code>push rdi</code> ; récupérez-le avec <code>pop rdi</code> au retour.</li>
+        <li>Dans GDB, posez un point d'arrêt sur <code>factorial</code> et tapez <code>bt</code> à chaque arrêt : la pile des appels grandit.</li>
+        <li>À partir de quelle valeur de <code>n</code> le résultat devient-il faux ? Pourquoi ?</li>
+      </ul>
+    </details>
+
+    <h3>Défi – Les nombres négatifs</h3>
+    <p>Écrivez la fonction <code>print_int</code>, qui affiche un entier <strong>signé</strong> : si <code>rdi</code> est négatif, elle affiche un <code>-</code>, puis appelle <code>print_uint</code> sur la valeur opposée (<code>neg</code>).</p>
+  </section>
+
+</main>
+
+<footer class="pied">Chris CHEVALIER · 2ASSE – Architecture bas niveau et assembleur · École Hexagone</footer>
+
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/js/enonce.js"></script>
+</body>
+</html>

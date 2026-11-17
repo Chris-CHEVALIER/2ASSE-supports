@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mémoire et instructions – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/hexagone.css">
+  <link rel="stylesheet" href="../assets/css/asm.css">
+</head>
+<body data-pied="2ASSE – Architecture bas niveau et assembleur · Cours 2 – Mémoire et instructions">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ================================================================== -->
+  <section data-layout="titre">
+    <h1>Mémoire et instructions</h1>
+    <div class="sous-titre">
+      <span class="code-module">2ASSE</span> – Cours 2<br>
+      Chris CHEVALIER
+    </div>
+  </section>
+
+  <section data-layout="sommaire">
+    <h1>Sommaire</h1>
+    <ol>
+      <li>La mémoire d'un programme</li>
+      <li>Lire et écrire en mémoire</li>
+      <li>Comparer et sauter</li>
+      <li>La pile et les fonctions</li>
+      <li>Appels système et interruptions</li>
+      <li>Observer la mémoire dans GDB</li>
+    </ol>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #1 LA MÉMOIRE D'UN PROGRAMME                                       -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#1</div>
+    <h2>La mémoire d'un programme</h2>
+    <div class="sous-titre">Mémoire et instructions</div>
+  </section>
+
+  <section>
+    <h2>Une adresse, un octet</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul class="dense">
+            <li>La mémoire est une immense suite d'<strong>octets</strong> numérotés : ce numéro est l'<strong>adresse</strong></li>
+            <li>Une adresse se note en hexadécimal : <code>0x402000</code></li>
+            <li>Une valeur de plusieurs octets occupe des adresses consécutives, en <strong>petit-boutisme</strong></li>
+            <li>Une <strong>étiquette</strong> (<code>grades</code>, <code>msg</code>) n'est qu'un nom donné à une adresse</li>
+          </ul>
+        </div>
+        <div>
+          <table class="indices">
+            <tr><th>Adresse</th><td>0x402000</td><td>…01</td><td>…02</td><td>…03</td><td>…04</td></tr>
+            <tr class="car"><th>Octet</th><td>0E</td><td>E8</td><td>03</td><td>00</td><td>00</td></tr>
+          </table>
+          <p class="petit">Ici, l'octet <code>grade</code> vaut 14 (<code>0x0E</code>) et le qword <code>total</code> commence à <code>0x402001</code> : <code>E8 03 00 …</code> se lit <code>0x3E8</code> = 1000.</p>
+        </div>
+      </div>
+      <div class="encadre marine" style="margin-top: 10px;">
+        Un <strong>pointeur</strong>, en C, n'est rien d'autre qu'une variable qui contient une adresse. En assembleur, tout registre peut jouer ce rôle.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>L'organisation d'un processus en mémoire</h2>
+    <div class="corps">
+      <div class="colonnes schema-texte" style="grid-template-columns: .8fr 1fr;">
+        <svg viewBox="0 0 360 400" class="schema" role="img" aria-label="Organisation de la mémoire : code, données, bss, tas, espace libre et pile">
+          <text x="10" y="18" class="texte-bus sombre" style="text-anchor: start;">adresses hautes</text>
+          <rect x="10" y="28" width="240" height="56" rx="6" class="boite-marine"/>
+          <text x="130" y="62" class="titre-boite clair">Pile (stack)</text>
+          <text x="300" y="90" class="texte-boite">↓ grandit</text>
+          <rect x="10" y="88" width="240" height="96" rx="6" class="boite-blanche" style="stroke-dasharray: 6 5;"/>
+          <text x="130" y="142" class="texte-boite">espace libre</text>
+          <text x="300" y="182" class="texte-boite">↑ grandit</text>
+          <rect x="10" y="188" width="240" height="46" rx="6" class="boite-claire"/>
+          <text x="130" y="217" class="texte-boite">Tas (heap)</text>
+          <rect x="10" y="238" width="240" height="40" rx="6" class="boite-ambre"/>
+          <text x="130" y="264" class="texte-boite">.bss</text>
+          <rect x="10" y="282" width="240" height="40" rx="6" class="boite-ambre"/>
+          <text x="130" y="308" class="texte-boite">.data</text>
+          <rect x="10" y="326" width="240" height="40" rx="6" class="boite-marine"/>
+          <text x="130" y="352" class="titre-boite clair">.text (code)</text>
+          <text x="10" y="392" class="texte-bus sombre" style="text-anchor: start;">adresses basses (0x401000)</text>
+        </svg>
+        <div class="dense">
+          <table class="serre">
+            <tr><th>Zone</th><th>Contenu</th></tr>
+            <tr><td><code>.text</code></td><td>les instructions, en lecture seule</td></tr>
+            <tr><td><code>.data</code></td><td>les données initialisées (<code>db</code>, <code>dq</code>…)</td></tr>
+            <tr><td><code>.bss</code></td><td>les données réservées, mises à zéro au lancement (<code>resb</code>, <code>resq</code>)</td></tr>
+            <tr><td>tas</td><td>la mémoire demandée pendant l'exécution (<code>malloc</code> en C)</td></tr>
+            <tr><td>pile</td><td>les adresses de retour, les variables locales, les sauvegardes de registres</td></tr>
+          </table>
+          <p class="petit muet">Chaque processus a son propre <strong>espace d'adressage</strong> : ses adresses sont virtuelles et le système les traduit en adresses physiques. Deux programmes peuvent utiliser la même adresse sans se gêner.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Sur un vrai programme lié dynamiquement, il y a aussi les bibliothèques et le placement aléatoire des zones (ASLR). Nos programmes NASM liés par ld commencent toujours à 0x401000.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Déclarer des données</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="micro" data-titre="memory.asm" data-code="16"><code class="language-x86asm" data-trim>
+; memory.asm : lire et écrire en mémoire
+section .data
+    grade   db 14               ; un octet initialisé
+    total   dq 1000             ; huit octets initialisés
+
+section .bss
+    copy    resb 1              ; un octet réservé
+
+section .text
+    global _start
+
+_start:
+    mov al, [grade]             ; lit l'octet en grade
+    add al, 2
+    mov [copy], al              ; écrit 16 à l'adresse copy
+    add qword [total], 5        ; total = 1005, en mémoire
+
+    movzx rdi, byte [copy]      ; code de retour = 16
+    mov rax, 60
+    syscall
+</code></pre>
+        <div class="dense">
+          <ul>
+            <li><code>grade</code> vaut une <strong>adresse</strong> ; <code>[grade]</code> désigne la <strong>case mémoire</strong> à cette adresse</li>
+            <li><code>resb 1</code> réserve un octet (<code>resq 4</code> : quatre qwords)</li>
+            <li>Quand rien n'indique la taille, on la précise : <code>byte</code>, <code>word</code>, <code>dword</code>, <code>qword</code></li>
+            <li><code>movzx</code> copie une petite valeur dans un grand registre en complétant par des zéros</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      add [total], 5 seul est refusé par NASM : il ne sait pas combien d'octets modifier. D'où qword.
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #2 LIRE ET ÉCRIRE EN MÉMOIRE                                       -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#2</div>
+    <h2>Lire et écrire en mémoire</h2>
+    <div class="sous-titre">Mémoire et instructions</div>
+  </section>
+
+  <section>
+    <h2>Les modes d'adressage</h2>
+    <div class="corps">
+      <p>Entre crochets, x86-64 calcule une adresse de la forme <code>[base + index × échelle + déplacement]</code>, avec une échelle de 1, 2, 4 ou 8.</p>
+      <table class="serre">
+        <tr><th>Écriture</th><th>Adresse lue</th><th>Usage typique</th></tr>
+        <tr><td><code>[grade]</code></td><td>l'adresse de l'étiquette</td><td>une variable</td></tr>
+        <tr><td><code>[rsi]</code></td><td>l'adresse contenue dans <code>rsi</code></td><td>un pointeur</td></tr>
+        <tr><td><code>[rsi + 3]</code></td><td><code>rsi</code> + 3</td><td>le 4<sup>e</sup> octet d'une chaîne</td></tr>
+        <tr><td><code>[grades + rcx*8]</code></td><td><code>grades</code> + 8 × <code>rcx</code></td><td>l'élément n° <code>rcx</code> d'un tableau de qwords</td></tr>
+        <tr><td><code>[rsp + 8]</code></td><td>8 octets au-dessus du sommet de pile</td><td>une valeur rangée sur la pile</td></tr>
+      </table>
+      <div class="colonnes" style="margin-top: 14px;">
+        <div class="encadre"><code>mov rax, [rsi]</code> <strong>lit</strong> la mémoire à l'adresse <code>rsi</code>.</div>
+        <div class="encadre"><code>lea rax, [rsi + 8]</code> <strong>calcule</strong> l'adresse sans rien lire : <code>rax = rsi + 8</code>.</div>
+      </div>
+      <p class="petit muet"><code>lea</code> signifie <em>Load Effective Address</em> (charger l'adresse calculée).</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Les tableaux</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p>Un tableau est une suite d'éléments <strong>de même taille</strong>, rangés côte à côte.</p>
+          <pre class="compact" data-titre="extrait" data-extrait><code class="language-x86asm" data-trim>
+grades dq 12, 15, 9, 17, 14
+</code></pre>
+          <table class="indices">
+            <tr><th>Indice</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+            <tr class="car"><th>Valeur</th><td>12</td><td>15</td><td>9</td><td>17</td><td>14</td></tr>
+            <tr><th>Décalage</th><td>+0</td><td>+8</td><td>+16</td><td>+24</td><td>+32</td></tr>
+          </table>
+        </div>
+        <div>
+          <ul class="dense">
+            <li>Adresse de l'élément <code>i</code> : <code>grades + i × taille</code></li>
+            <li>Avec <code>dq</code>, la taille est 8 : <code>[grades + rcx*8]</code></li>
+            <li>Avec <code>db</code>, la taille est 1 : <code>[grades + rcx]</code></li>
+          </ul>
+          <div class="encadre marine">
+            Le processeur ne connaît <strong>ni la taille ni la fin</strong> d'un tableau. Lire <code>[grades + 5*8]</code> ne provoque aucune erreur : on lit simplement ce qui suit en mémoire.
+          </div>
+        </div>
+      </div>
+      <p class="petit muet">Ce manque de contrôle est à l'origine des <strong>dépassements de tampon</strong> (<em>buffer overflow</em>), l'une des failles de sécurité les plus exploitées : écrire au-delà d'un tableau écrase ce qui le suit.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #3 COMPARER ET SAUTER                                              -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#3</div>
+    <h2>Comparer et sauter</h2>
+    <div class="sous-titre">Mémoire et instructions</div>
+  </section>
+
+  <section>
+    <h2>Sauts et comparaisons</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul class="dense">
+            <li><code>jmp etiquette</code> : <strong>saut inconditionnel</strong>, <code>rip</code> prend l'adresse de l'étiquette</li>
+            <li><code>cmp a, b</code> calcule <code>a − b</code> <strong>sans garder le résultat</strong> : seuls les indicateurs changent</li>
+            <li>Un <strong>saut conditionnel</strong> lit ensuite les indicateurs et saute… ou continue à la ligne suivante</li>
+            <li><code>test a, a</code> calcule un ET logique : pratique pour savoir si un registre vaut zéro</li>
+          </ul>
+        </div>
+        <div>
+          <table class="serre">
+            <tr><th>Après <code>cmp a, b</code></th><th>Signé</th><th>Non signé</th></tr>
+            <tr><td><code>a == b</code></td><td colspan="2" style="text-align: center;"><code>je</code> (ZF = 1)</td></tr>
+            <tr><td><code>a != b</code></td><td colspan="2" style="text-align: center;"><code>jne</code> (ZF = 0)</td></tr>
+            <tr><td><code>a &lt; b</code></td><td><code>jl</code></td><td><code>jb</code> (CF = 1)</td></tr>
+            <tr><td><code>a &lt;= b</code></td><td><code>jle</code></td><td><code>jbe</code></td></tr>
+            <tr><td><code>a &gt; b</code></td><td><code>jg</code></td><td><code>ja</code></td></tr>
+            <tr><td><code>a &gt;= b</code></td><td><code>jge</code></td><td><code>jae</code></td></tr>
+          </table>
+          <p class="petit muet">l = <em>less</em>, g = <em>greater</em> (signé) ; b = <em>below</em>, a = <em>above</em> (non signé) ; e = <em>equal</em>.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Le choix signé ou non signé, c'est exactement le « c'est l'instruction qui décide de l'interprétation » du cours 1. Avec −1 (0xFF…), jl dit « plus petit que 0 » et jb dit « plus grand que tout ».
+    </aside>
+  </section>
+
+  <section>
+    <h2>Une condition : si… sinon…</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="micro" style="font-size: 12px; line-height: 1.28;" data-titre="passed.asm" data-code="0" data-sortie="Admis\n"><code class="language-x86asm" data-trim>
+; passed.asm : « Admis » ou « Ajourné »
+section .data
+    average dq 11
+    ok      db "Admis", 10
+    ok_len  equ $ - ok
+    ko      db "Ajourné", 10
+    ko_len  equ $ - ko
+section .text
+    global _start
+_start:
+    mov rax, [average]
+    cmp rax, 10
+    jl failed           ; si average < 10
+    mov rsi, ok         ; sinon : « Admis »
+    mov rdx, ok_len
+    jmp display         ; saute le bloc « sinon »
+failed:
+    mov rsi, ko
+    mov rdx, ko_len
+display:
+    mov rax, 1          ; write
+    mov rdi, 1
+    syscall
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+</code></pre>
+        <div class="dense">
+          <pre class="compact" data-titre="en pseudo-code" data-extrait><code class="language-plaintext" data-trim>
+SI average < 10 ALORS
+    message ← "Ajourné"
+SINON
+    message ← "Admis"
+FIN SI
+AFFICHER message
+</code></pre>
+          <ul>
+            <li>Le saut conditionnel teste la condition <strong>inverse</strong> pour sauter au bloc « sinon »</li>
+            <li>Sans le <code>jmp display</code>, le bloc « Admis » continuerait dans le bloc « Ajourné »</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Une boucle : additionner un tableau</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="micro" data-titre="sum.asm" data-code="67"><code class="language-x86asm" data-trim>
+; sum.asm : additionne les notes d'un tableau
+section .data
+    grades  dq 12, 15, 9, 17, 14    ; 5 qwords
+    count   equ 5
+
+section .text
+    global _start
+
+_start:
+    xor rax, rax                ; rax = somme
+    xor rcx, rcx                ; rcx = indice
+next:
+    add rax, [grades + rcx*8]   ; élément n° rcx
+    inc rcx
+    cmp rcx, count
+    jl next                     ; tant que rcx < 5
+
+    mov rdi, rax                ; 67
+    mov rax, 60
+    syscall
+</code></pre>
+        <div class="dense">
+          <pre class="compact" data-titre="en pseudo-code" data-extrait><code class="language-plaintext" data-trim>
+somme ← 0
+i ← 0
+RÉPÉTER
+    somme ← somme + grades[i]
+    i ← i + 1
+TANT QUE i < 5
+</code></pre>
+          <ul>
+            <li>Une boucle est un <strong>saut vers l'arrière</strong></li>
+            <li>Ici, le test est en bas : le corps s'exécute au moins une fois</li>
+            <li><code>count equ 5</code> est une <strong>constante</strong> : elle n'occupe aucune place en mémoire</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Que renvoie ce programme ?</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="micro" data-titre="quiz_loop.asm" data-code="4"><code class="language-x86asm" data-trim>
+section .data
+    values  db 3, 250, 7, 1
+
+section .text
+    global _start
+
+_start:
+    xor rdi, rdi
+    xor rcx, rcx
+again:
+    movzx rax, byte [values + rcx]
+    cmp al, 5
+    jae skip
+    add rdi, rax
+skip:
+    inc rcx
+    cmp rcx, 4
+    jne again
+
+    mov rax, 60
+    syscall
+</code></pre>
+        <div>
+          <p class="petit"><strong>1.</strong> Quel code de retour ? <strong>2.</strong> Et si l'on remplace <code>jae</code> par <code>jge</code> ?</p>
+          <div class="reponse fragment">La boucle parcourt les 4 octets de <code>values</code> (indice + 1 : ce sont des <code>db</code>) et additionne ceux qui ne sont pas sautés.</div>
+          <div class="reponse fragment"><strong>1.</strong> <code>jae</code> compare en non signé : 250 et 7 sont ≥ 5, donc sautés. Code de retour 3 + 1 = <strong>4</strong>.</div>
+          <div class="reponse fragment"><strong>2.</strong> <code>jge</code> compare en signé : l'octet 250 (<code>0xFA</code>) se lit −6, qui est &lt; 5. Il est ajouté : 3 + 250 + 1 = <strong>254</strong>.</div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Les deux versions ont été exécutées. Le piège est le même que pour les indicateurs du cours 1 : un octet n'a pas de signe, c'est l'instruction qui l'interprète.
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #4 LA PILE ET LES FONCTIONS                                        -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#4</div>
+    <h2>La pile et les fonctions</h2>
+    <div class="sous-titre">Mémoire et instructions</div>
+  </section>
+
+  <section>
+    <h2>La pile</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="micro" data-titre="stack.asm" data-code="21"><code class="language-x86asm" data-trim>
+; stack.asm : push et pop sur la pile
+section .text
+    global _start
+
+_start:
+    mov rax, 1
+    mov rbx, 2
+    push rax            ; la pile contient 1
+    push rbx            ; 1 puis 2 au sommet
+    pop rax             ; rax = 2 (dernier entré)
+    pop rbx             ; rbx = 1
+
+    imul rdi, rax, 10   ; rdi = 20
+    add rdi, rbx        ; rdi = 21
+    mov rax, 60
+    syscall
+</code></pre>
+        <div class="dense">
+          <ul>
+            <li>La <strong>pile</strong> est une zone de mémoire gérée en « dernier entré, premier sorti », comme une pile d'assiettes</li>
+            <li><code>rsp</code> contient l'adresse du <strong>sommet</strong></li>
+            <li><code>push rax</code> : <code>rsp</code> diminue de 8, puis <code>rax</code> est écrit à l'adresse <code>rsp</code></li>
+            <li><code>pop rax</code> : la valeur au sommet est lue dans <code>rax</code>, puis <code>rsp</code> augmente de 8</li>
+          </ul>
+          <div class="encadre marine">La pile grandit vers les <strong>adresses basses</strong>. Chaque <code>push</code> doit avoir son <code>pop</code>.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Appeler une fonction : <code>call</code> et <code>ret</code></h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="micro" data-titre="square.asm" data-code="58"><code class="language-x86asm" data-trim>
+; square.asm : une fonction appelée avec call et ret
+section .text
+    global _start
+
+; square : renvoie dans rax le carré de rdi
+square:
+    mov rax, rdi
+    imul rax, rdi
+    ret                 ; revient juste après le call
+
+_start:
+    mov rdi, 7
+    call square         ; rax = 49
+    mov rbx, rax
+    mov rdi, 3
+    call square         ; rax = 9
+    add rbx, rax        ; rbx = 58
+
+    mov rdi, rbx
+    mov rax, 60
+    syscall
+</code></pre>
+        <div class="dense">
+          <ul>
+            <li><code>call square</code> <strong>empile l'adresse de retour</strong> (celle de l'instruction suivante), puis saute à <code>square</code></li>
+            <li><code>ret</code> <strong>dépile</strong> cette adresse dans <code>rip</code> : l'exécution reprend après le <code>call</code></li>
+            <li>Une même fonction peut ainsi être appelée depuis plusieurs endroits</li>
+          </ul>
+          <div class="encadre marine">
+            L'adresse de retour est rangée <strong>sur la pile</strong>, juste à côté des variables locales. Un dépassement de tampon qui l'écrase permet de choisir où <code>ret</code> va sauter.
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      C'est la base de l'exploitation des dépassements de tampon, montrée au cours 3. Faire le lien avec « celui qui contrôle rip contrôle le programme ».
+    </aside>
+  </section>
+
+  <section>
+    <h2>La convention d'appel</h2>
+    <div class="corps">
+      <p>Pour que des fonctions écrites par des personnes différentes (ou par un compilateur C) fonctionnent ensemble, Linux suit la convention <strong>System V AMD64</strong>.</p>
+      <table class="serre">
+        <tr><th>Rôle</th><th>Registres</th></tr>
+        <tr><td>Arguments 1 à 6</td><td><code>rdi</code>, <code>rsi</code>, <code>rdx</code>, <code>rcx</code>, <code>r8</code>, <code>r9</code> (les suivants sur la pile)</td></tr>
+        <tr><td>Valeur de retour</td><td><code>rax</code></td></tr>
+        <tr><td>Peuvent être modifiés par la fonction</td><td><code>rax</code>, <code>rcx</code>, <code>rdx</code>, <code>rsi</code>, <code>rdi</code>, <code>r8</code> à <code>r11</code></td></tr>
+        <tr><td>Doivent être <strong>préservés</strong> par la fonction</td><td><code>rbx</code>, <code>rbp</code>, <code>r12</code> à <code>r15</code> (et <code>rsp</code>)</td></tr>
+      </table>
+      <div class="colonnes" style="margin-top: 14px;">
+        <div class="encadre">Une fonction qui utilise <code>rbx</code> le sauvegarde d'abord : <code>push rbx</code> au début, <code>pop rbx</code> avant <code>ret</code>.</div>
+        <div class="encadre">Les appels système utilisent presque les mêmes registres, mais <code>r10</code> remplace <code>rcx</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #5 APPELS SYSTÈME ET INTERRUPTIONS                                 -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#5</div>
+    <h2>Appels système et interruptions</h2>
+    <div class="sous-titre">Mémoire et instructions</div>
+  </section>
+
+  <section>
+    <h2>Mode utilisateur et mode noyau</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul class="dense">
+            <li>Le processeur a plusieurs <strong>niveaux de privilège</strong>. Nos programmes tournent en <strong>mode utilisateur</strong> : ils n'ont pas accès directement au matériel</li>
+            <li>Le <strong>noyau</strong> du système tourne en <strong>mode noyau</strong> : il gère la mémoire, les fichiers, l'écran, le réseau</li>
+            <li>L'instruction <code>syscall</code> fait passer le processeur en mode noyau, à une adresse fixée par le noyau, puis <code>sysret</code> le ramène dans le programme</li>
+          </ul>
+        </div>
+        <div>
+          <table class="serre">
+            <tr><th>Étape</th><th>Qui ?</th><th>Quoi ?</th></tr>
+            <tr><td>1</td><td>Programme</td><td>prépare <code>rax</code>, <code>rdi</code>, <code>rsi</code>…</td></tr>
+            <tr><td>2</td><td>Programme</td><td>exécute <code>syscall</code></td></tr>
+            <tr><td>3</td><td><strong>Noyau</strong></td><td>vérifie la demande, agit, met le résultat dans <code>rax</code></td></tr>
+            <tr><td>4</td><td>Programme</td><td>reprend à l'instruction suivante</td></tr>
+          </table>
+          <p class="petit" style="margin-top: 14px;">Le noyau <strong>vérifie</strong> chaque demande : un programme ne peut pas écrire dans un fichier protégé ou lire la mémoire d'un autre programme.</p>
+        </div>
+      </div>
+      <p class="petit muet">En x86 32 bits, on passait par l'interruption logicielle <code>int 0x80</code>, avec d'autres numéros d'appels. On la rencontre encore dans de vieux tutoriels : ne la mélangez pas avec <code>syscall</code>.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Les interruptions</h2>
+    <div class="corps">
+      <p>Une <strong>interruption</strong> suspend le programme en cours pour faire exécuter au processeur une routine du noyau, puis le reprend.</p>
+      <table class="serre">
+        <tr><th>Origine</th><th>Exemples</th><th>Ce qui se passe</th></tr>
+        <tr><td><strong>Matérielle</strong></td><td>touche du clavier, horloge, carte réseau</td><td>le noyau traite l'événement puis reprend le programme, qui ne s'aperçoit de rien</td></tr>
+        <tr><td><strong>Exception</strong> (causée par l'instruction)</td><td>division par zéro, accès à une adresse interdite</td><td>le noyau envoie un <strong>signal</strong> au programme, qui est tué par défaut</td></tr>
+        <tr><td><strong>Logicielle</strong> (demandée)</td><td><code>syscall</code>, <code>int 0x80</code></td><td>le noyau rend le service demandé</td></tr>
+      </table>
+      <div class="colonnes" style="margin-top: 14px;">
+        <div class="encadre"><code>Segmentation fault</code> : signal SIGSEGV (n° 11), code de retour 128 + 11 = <strong>139</strong>.</div>
+        <div class="encadre"><code>Floating point exception</code> : signal SIGFPE (n° 8) après une division par zéro, code <strong>136</strong>.</div>
+      </div>
+      <p class="petit muet">L'interruption d'horloge permet au noyau de reprendre la main régulièrement pour partager le processeur entre les programmes.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Lire au clavier</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="micro" data-titre="echo.asm" data-code="0" data-entree="Cosmo\n" data-sortie="Cosmo\n"><code class="language-x86asm" data-trim>
+; echo.asm : lit une ligne et la réaffiche
+section .bss
+    buffer  resb 64             ; 64 octets pour la saisie
+
+section .text
+    global _start
+
+_start:
+    mov rax, 0                  ; read
+    mov rdi, 0                  ; entrée standard
+    mov rsi, buffer             ; où ranger les octets lus
+    mov rdx, 64                 ; au plus 64 octets
+    syscall                     ; rax = nombre d'octets lus
+
+    mov rdx, rax                ; longueur lue
+    mov rax, 1                  ; write
+    mov rdi, 1
+    mov rsi, buffer
+    syscall
+
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+</code></pre>
+        <div class="dense">
+          <ul>
+            <li><code>read</code> attend que l'utilisateur valide avec <kbd>Entrée</kbd></li>
+            <li>Il renvoie dans <code>rax</code> le <strong>nombre d'octets lus</strong>, saut de ligne compris : <code>Cosmo</code> donne 6</li>
+            <li>Le texte n'est pas terminé par un zéro : seule la longueur renvoyée indique sa fin</li>
+          </ul>
+          <div class="encadre marine"><code>rdx</code> limite la lecture à la taille du tampon. Avec une valeur plus grande que <code>resb</code>, la saisie déborderait sur la mémoire voisine.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #6 OBSERVER LA MÉMOIRE DANS GDB                                    -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#6</div>
+    <h2>Observer la mémoire dans GDB</h2>
+    <div class="sous-titre">Mémoire et instructions</div>
+  </section>
+
+  <section>
+    <h2>La commande <code>x</code> (<em>examine</em>)</h2>
+    <div class="corps">
+      <p><code>x/NFT adresse</code> affiche <strong>N</strong> éléments, au format <strong>F</strong>, de taille <strong>T</strong>, à partir d'une adresse.</p>
+      <div class="colonnes">
+        <table class="serre">
+          <tr><th>Format F</th><th>Taille T</th></tr>
+          <tr><td><code>x</code> hexadécimal</td><td><code>b</code> octet</td></tr>
+          <tr><td><code>d</code> décimal signé, <code>u</code> non signé</td><td><code>h</code> 2 octets</td></tr>
+          <tr><td><code>c</code> caractère, <code>s</code> chaîne</td><td><code>w</code> 4 octets</td></tr>
+          <tr><td><code>i</code> instruction</td><td><code>g</code> 8 octets</td></tr>
+        </table>
+        <table class="serre">
+          <tr><th>Exemple</th><th>Affiche</th></tr>
+          <tr><td><code>x/5dg &amp;grades</code></td><td>les 5 qwords du tableau en décimal</td></tr>
+          <tr><td><code>x/8xb &amp;grades</code></td><td>les 8 premiers octets, en hexadécimal</td></tr>
+          <tr><td><code>x/s &amp;msg</code></td><td>la chaîne qui commence à <code>msg</code></td></tr>
+          <tr><td><code>x/3i $rip</code></td><td>les 3 prochaines instructions</td></tr>
+          <tr><td><code>x/2xg $rsp</code></td><td>les 2 qwords au sommet de la pile</td></tr>
+        </table>
+      </div>
+      <p class="petit muet">Le <code>&amp;</code> demande l'adresse de l'étiquette, comme en C. <code>p/x $rsp</code> affiche l'adresse du sommet de pile.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Voir l'adresse de retour</h2>
+    <div class="corps">
+      <div class="colonnes texte-code" style="grid-template-columns: .8fr 1.4fr;">
+        <div class="dense">
+          <ol>
+            <li>On s'arrête au début de <code>square</code>, juste après le premier <code>call</code></li>
+            <li>Le sommet de la pile contient <code>0x401012</code></li>
+            <li>C'est l'adresse de <code>mov rbx, rax</code>, l'instruction qui suit le <code>call</code> : <code>ret</code> y reviendra</li>
+          </ol>
+          <p class="petit muet"><code>bt</code> (<em>backtrace</em>) affiche la chaîne des appels en cours.</p>
+        </div>
+        <pre class="terminal mini" data-titre="Terminal"><code class="language-plaintext" data-trim>
+$ gdb -q ./square
+Reading symbols from ./square...
+(gdb) break square
+Breakpoint 1 at 0x401000: file square.asm, line 7.
+(gdb) run
+Starting program: /workspaces/2asse-nom-prenom/tp2/square
+
+Breakpoint 1, square () at square.asm:7
+7           mov rax, rdi
+(gdb) x/xg $rsp
+0x7fffffffde08: 0x0000000000401012
+(gdb) x/i 0x401012
+   0x401012 &lt;_start+10&gt;:    mov    rbx,rax
+</code></pre>
+      </div>
+    </div>
+    <aside class="notes">
+      L'adresse de la pile (0x7fffffffde08 dans le Codespace de test) peut varier ; l'adresse de retour, elle, est toujours 0x401012. Sortie vérifiée dans un Codespace le 17/11.
+    </aside>
+  </section>
+
+  <section>
+    <h2>À retenir</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <ul class="dense">
+          <li>Un processus : <code>.text</code>, <code>.data</code>, <code>.bss</code>, tas et pile, dans son propre espace d'adressage</li>
+          <li><code>[adresse]</code> désigne une case mémoire ; <code>[base + index*échelle + déplacement]</code> parcourt un tableau</li>
+          <li>Le processeur ne vérifie jamais les bornes d'un tableau</li>
+          <li><code>cmp</code> puis un saut conditionnel : <code>jl</code>/<code>jg</code> en signé, <code>jb</code>/<code>ja</code> en non signé</li>
+        </ul>
+        <ul class="dense">
+          <li>La pile grandit vers le bas : <code>push</code>, <code>pop</code>, <code>rsp</code></li>
+          <li><code>call</code> empile l'adresse de retour, <code>ret</code> la dépile dans <code>rip</code></li>
+          <li>Convention System V : arguments dans <code>rdi</code>, <code>rsi</code>, <code>rdx</code>…, retour dans <code>rax</code></li>
+          <li>Interruptions matérielles, exceptions (SIGSEGV, SIGFPE) et appels système</li>
+        </ul>
+      </div>
+      <div class="encadre marine" style="margin-top: 14px;">À vous : le <strong>TP2 – Boucles, tableaux et fonctions</strong>.</div>
+    </div>
+  </section>
+
+  <section data-layout="titre">
+    <h1>Des questions ?</h1>
+    <div class="sous-titre">
+      Chris CHEVALIER<br>
+      chris.chevalier@ecole-hexagone.com
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="../assets/vendor/reveal/dist/reveal.js"></script>
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/vendor/reveal/plugin/notes/notes.js"></script>
+<script src="../assets/js/hexagone.js"></script>
+</body>
+</html>
