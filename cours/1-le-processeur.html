@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Le processeur – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/hexagone.css">
+  <link rel="stylesheet" href="../assets/css/asm.css">
+</head>
+<body data-pied="2ASSE – Architecture bas niveau et assembleur · Cours 1 – Le processeur">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ================================================================== -->
+  <section data-layout="titre">
+    <h1>Le processeur</h1>
+    <div class="sous-titre">
+      <span class="code-module">2ASSE</span> – Cours 1<br>
+      Chris CHEVALIER
+    </div>
+  </section>
+
+  <section data-layout="sommaire">
+    <h1>Sommaire</h1>
+    <ol>
+      <li>Du code au processeur</li>
+      <li>Les données en binaire</li>
+      <li>L'architecture d'un ordinateur</li>
+      <li>Les registres x86-64</li>
+      <li>Un premier programme</li>
+      <li>Premiers pas dans GDB</li>
+    </ol>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #1 DU CODE AU PROCESSEUR                                           -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#1</div>
+    <h2>Du code au processeur</h2>
+    <div class="sous-titre">Le processeur</div>
+  </section>
+
+  <section>
+    <h2>Ce que le processeur exécute vraiment</h2>
+    <div class="corps">
+      <div class="colonnes c3 niveaux">
+        <div class="carte">
+          <h3>Langage C</h3>
+          <pre class="compact" data-titre="total.c"><code class="language-c" data-trim>
+total = 7;
+total = total + 5;
+</code></pre>
+          <p class="petit">Lisible par un humain, indépendant du processeur</p>
+        </div>
+        <div class="carte">
+          <h3>Assembleur x86-64</h3>
+          <pre class="compact" data-titre="total.asm" data-extrait><code class="language-x86asm" data-trim>
+mov eax, 7
+add eax, 5
+</code></pre>
+          <p class="petit">Une ligne = une instruction du processeur</p>
+        </div>
+        <div class="carte">
+          <h3>Langage machine</h3>
+          <pre class="compact" data-titre="octets en mémoire"><code class="language-plaintext" data-trim>
+b8 07 00 00 00
+83 c0 05
+</code></pre>
+          <p class="petit">Les octets que le processeur lit et exécute</p>
+        </div>
+      </div>
+      <ul class="dense" style="margin-top: 6px;">
+        <li>Le <strong>langage machine</strong> est une suite d'octets : c'est la seule chose que le processeur comprend</li>
+        <li>L'<strong>assembleur</strong> (ou langage d'assemblage) donne un nom lisible à chaque instruction : <code>mov</code>, <code>add</code>… Ces noms s'appellent des <strong>mnémoniques</strong></li>
+      </ul>
+    </div>
+    <aside class="notes">
+      Faire remarquer que le 7 apparaît dans les octets : b8 = « mov eax, valeur », puis 07 00 00 00 = 7 sur 4 octets, à l'envers (petit-boutisme, section suivante).
+      Les octets viennent d'objdump sur le programme assemblé par NASM.
+    </aside>
+  </section>
+
+  <section>
+    <h2>De la source à l'exécutable</h2>
+    <div class="corps">
+      <div class="frise chaine">
+        <div class="etape"><div class="date"><code>hello.asm</code></div><ul><li>Code source en assembleur, écrit par vous</li></ul></div>
+        <div class="etape"><div class="date">NASM</div><ul><li>L'<strong>assembleur</strong> traduit chaque instruction en octets</li><li>Produit <code>hello.o</code></li></ul></div>
+        <div class="etape"><div class="date">ld</div><ul><li>L'<strong>éditeur de liens</strong> place le code en mémoire et fixe les adresses</li><li>Produit <code>hello</code></li></ul></div>
+        <div class="etape marine"><div class="date"><code>./hello</code></div><ul><li>Le système charge l'exécutable en mémoire et le lance</li></ul></div>
+      </div>
+      <div class="colonnes" style="margin-top: 22px;">
+        <div class="encadre">
+          En C, <code>gcc</code> enchaîne ces étapes pour vous : il <strong>compile</strong> le C en assembleur, puis appelle l'assembleur et l'éditeur de liens.
+        </div>
+        <div class="encadre marine">
+          Le mot « assembleur » désigne à la fois le <strong>langage</strong> et l'<strong>outil</strong> qui le traduit (ici NASM, le <em>Netwide Assembler</em>).
+        </div>
+      </div>
+      <p class="petit muet" style="margin-top: 10px;">Le fichier <code>.o</code> est un <strong>fichier objet</strong> : du code machine dont les adresses ne sont pas encore fixées. Sous Linux, l'exécutable final est au format <strong>ELF</strong> (<em>Executable and Linkable Format</em>).</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Un assembleur par famille de processeurs</h2>
+    <div class="corps">
+      <p>Chaque famille de processeurs a son propre <strong>jeu d'instructions</strong> (ISA, <em>Instruction Set Architecture</em>) : la liste des instructions qu'elle sait exécuter.</p>
+      <table>
+        <tr><th>Famille</th><th>Où la trouve-t-on ?</th><th>Exemple d'instruction</th></tr>
+        <tr><td><strong>x86-64</strong> (Intel, AMD)</td><td>PC, serveurs, la plupart des binaires analysés en cybersécurité</td><td><code>add eax, 5</code></td></tr>
+        <tr><td><strong>ARM</strong> (AArch64)</td><td>Smartphones, Mac à puce Apple, Raspberry Pi</td><td><code>add w0, w0, #5</code></td></tr>
+        <tr><td><strong>RISC-V</strong></td><td>Architecture ouverte et libre de droits, en plein essor</td><td><code>addi a0, a0, 5</code></td></tr>
+      </table>
+      <div class="encadre" style="margin-top: 10px;">
+        Dans ce module : <strong>x86-64</strong> sous <strong>Linux</strong>, avec la <strong>syntaxe Intel</strong> (destination à gauche). Un programme assemblé pour x86-64 ne tourne pas tel quel sur un processeur ARM.
+      </div>
+      <p class="petit muet" style="margin: 6px 0 0;">Une autre écriture existe, la syntaxe AT&amp;T (<code>addl $5, %eax</code>), utilisée par défaut par certains outils GNU. Elle inverse source et destination.</p>
+    </div>
+    <aside class="notes">
+      Les Mac récents sont en ARM : c'est pour cela que nous travaillons dans Codespaces, qui fournit une vraie machine x86-64.
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #2 LES DONNÉES EN BINAIRE                                          -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#2</div>
+    <h2>Les données en binaire</h2>
+    <div class="sous-titre">Le processeur</div>
+  </section>
+
+  <section>
+    <h2>Bits, octets et hexadécimal</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul class="dense">
+            <li>Un <strong>bit</strong> vaut 0 ou 1. Un <strong>octet</strong> regroupe 8 bits : de 0 à 255</li>
+            <li>Un chiffre <strong>hexadécimal</strong> (0 à 9 puis A à F) code exactement 4 bits. Un octet s'écrit donc avec 2 chiffres : <code>0xFF</code> = 255</li>
+            <li>En NASM, on écrit indifféremment <code>255</code>, <code>0xFF</code> ou <code>0b11111111</code></li>
+          </ul>
+          <table class="indices" style="margin-top: 10px;">
+            <tr><th>Binaire</th><td>0010</td><td>1010</td></tr>
+            <tr class="car"><th>Hexa</th><td>2</td><td>A</td></tr>
+          </table>
+          <p class="petit"><code>0x2A</code> = 2 × 16 + 10 = <strong>42</strong></p>
+        </div>
+        <div>
+          <table class="serre">
+            <tr><th>Taille</th><th>Nom NASM</th><th>Réserver</th></tr>
+            <tr><td>8 bits</td><td><code>byte</code> (octet)</td><td><code>db</code></td></tr>
+            <tr><td>16 bits</td><td><code>word</code> (mot)</td><td><code>dw</code></td></tr>
+            <tr><td>32 bits</td><td><code>dword</code> (double mot)</td><td><code>dd</code></td></tr>
+            <tr><td>64 bits</td><td><code>qword</code> (quadruple mot)</td><td><code>dq</code></td></tr>
+          </table>
+          <p class="petit muet"><code>db</code> signifie <em>define byte</em> : il écrit des octets dans le programme.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Les entiers négatifs : le complément à deux</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p>Pour obtenir <strong>−x</strong>, on <strong>inverse tous les bits</strong> de x puis on <strong>ajoute 1</strong>.</p>
+          <table class="serre">
+            <tr><th>Sur 8 bits</th><th>Binaire</th><th>Hexa</th></tr>
+            <tr><td>5</td><td><code>0000 0101</code></td><td><code>0x05</code></td></tr>
+            <tr><td>bits inversés</td><td><code>1111 1010</code></td><td><code>0xFA</code></td></tr>
+            <tr><td><strong>−5</strong> (+ 1)</td><td><code>1111 1011</code></td><td><code>0xFB</code></td></tr>
+            <tr><td><strong>−1</strong></td><td><code>1111 1111</code></td><td><code>0xFF</code></td></tr>
+          </table>
+        </div>
+        <div>
+          <ul class="dense">
+            <li>Le bit de gauche indique le signe : 1 pour un nombre négatif</li>
+            <li>Sur 8 bits : de <strong>−128 à 127</strong> en signé, de <strong>0 à 255</strong> en non signé</li>
+            <li>L'addition reste la même : 5 + (−5) donne <code>0x00</code> (la retenue sort de l'octet)</li>
+          </ul>
+          <div class="encadre marine">
+            <code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur ne sait pas lequel. C'est <strong>l'instruction choisie</strong> qui décide de l'interprétation.
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Vérification au tableau : 0xFB + 0x05 = 0x100, on ne garde que 8 bits, donc 0x00.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Le petit-boutisme et les caractères</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <h3 style="margin-bottom: 10px;">Petit-boutisme (<em>little-endian</em>)</h3>
+          <p class="petit">x86-64 range un nombre en mémoire <strong>octet de poids faible en premier</strong>.</p>
+          <table class="indices">
+            <tr><th>Adresse</th><td>+0</td><td>+1</td><td>+2</td><td>+3</td></tr>
+            <tr class="car"><th>Octet</th><td>44</td><td>33</td><td>22</td><td>11</td></tr>
+          </table>
+          <p class="petit">C'est ainsi qu'est rangé le dword <code>0x11223344</code>. Revoyez <code>b8 07 00 00 00</code> : le 7 vient en premier.</p>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 10px;">Caractères ASCII</h3>
+          <p class="petit">Un caractère est un octet. La table <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange" target="_blank">ASCII</a> donne son code.</p>
+          <table class="serre">
+            <tr><th>Caractère</th><th>Code</th></tr>
+            <tr><td><code>'0'</code> à <code>'9'</code></td><td><code>0x30</code> à <code>0x39</code></td></tr>
+            <tr><td><code>'A'</code> / <code>'a'</code></td><td><code>0x41</code> / <code>0x61</code></td></tr>
+            <tr><td>saut de ligne</td><td><code>10</code> (<code>0x0A</code>)</td></tr>
+          </table>
+          <p class="petit">Pour afficher le chiffre 7, on écrit l'octet <code>7 + '0'</code> = <code>0x37</code>.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Le petit-boutisme piège tout le monde la première fois qu'on lit la mémoire dans GDB. On le reverra dans le TP1.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Quiz express</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ol>
+            <li>Combien vaut <code>0x2A</code> en décimal ?</li>
+            <li>Comment s'écrit −2 sur 8 bits, en hexadécimal ?</li>
+            <li>Que vaut <code>'a' - 'A'</code> ?</li>
+            <li>Dans quel ordre sont rangés en mémoire les octets du word <code>0xBEEF</code> ?</li>
+          </ol>
+        </div>
+        <div>
+          <div class="reponse fragment"><strong>42</strong> (2 × 16 + 10)</div>
+          <div class="reponse fragment"><code>0xFE</code> : 2 = <code>0000 0010</code>, inversé <code>1111 1101</code>, + 1</div>
+          <div class="reponse fragment"><code>0x20</code> = 32 : passer de majuscule à minuscule, c'est ajouter 32</div>
+          <div class="reponse fragment"><code>EF</code> puis <code>BE</code> : poids faible en premier</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #3 L'ARCHITECTURE D'UN ORDINATEUR                                  -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#3</div>
+    <h2>L'architecture d'un ordinateur</h2>
+    <div class="sous-titre">Le processeur</div>
+  </section>
+
+  <section>
+    <h2>L'architecture de von Neumann</h2>
+    <div class="corps">
+      <div class="colonnes schema-texte">
+        <svg viewBox="0 0 560 380" class="schema" role="img" aria-label="Processeur, mémoire et entrées-sorties reliés par trois bus">
+          <rect x="10" y="10" width="250" height="230" rx="12" class="boite-marine"/>
+          <text x="135" y="40" class="titre-boite clair">Processeur (CPU)</text>
+          <rect x="30" y="58" width="210" height="46" rx="8" class="boite-ambre"/>
+          <text x="135" y="87" class="texte-boite">Unité de contrôle</text>
+          <rect x="30" y="116" width="210" height="46" rx="8" class="boite-ambre"/>
+          <text x="135" y="145" class="texte-boite">Unité arithmétique (ALU)</text>
+          <rect x="30" y="174" width="210" height="46" rx="8" class="boite-ambre"/>
+          <text x="135" y="203" class="texte-boite">Registres</text>
+          <rect x="300" y="10" width="250" height="230" rx="12" class="boite-claire"/>
+          <text x="425" y="40" class="titre-boite">Mémoire (RAM)</text>
+          <rect x="320" y="58" width="210" height="72" rx="8" class="boite-blanche"/>
+          <text x="425" y="100" class="texte-boite">Instructions</text>
+          <rect x="320" y="146" width="210" height="72" rx="8" class="boite-blanche"/>
+          <text x="425" y="188" class="texte-boite">Données</text>
+          <rect x="10" y="300" width="540" height="22" rx="4" class="bus-adresses"/>
+          <text x="280" y="316" class="texte-bus">bus d'adresses</text>
+          <rect x="10" y="326" width="540" height="22" rx="4" class="bus-donnees"/>
+          <text x="280" y="342" class="texte-bus sombre">bus de données</text>
+          <rect x="10" y="352" width="540" height="22" rx="4" class="bus-controle"/>
+          <text x="280" y="368" class="texte-bus sombre">bus de contrôle</text>
+          <line x1="135" y1="240" x2="135" y2="300" class="lien"/>
+          <line x1="425" y1="240" x2="425" y2="300" class="lien"/>
+          <rect x="190" y="252" width="180" height="36" rx="8" class="boite-blanche"/>
+          <text x="280" y="276" class="texte-boite">Entrées-sorties</text>
+          <line x1="280" y1="288" x2="280" y2="300" class="lien"/>
+        </svg>
+        <div class="dense">
+          <ul>
+            <li>Le <strong>processeur</strong> exécute les instructions une par une</li>
+            <li>La <strong>mémoire</strong> contient <strong>à la fois</strong> le programme et ses données</li>
+            <li>Les <strong>entrées-sorties</strong> relient l'ordinateur au monde : clavier, écran, disque, réseau</li>
+            <li>Les <strong>bus</strong> sont les fils qui transportent l'information entre eux</li>
+          </ul>
+          <div class="encadre marine">
+            Programme et données partagent la même mémoire. Si un attaquant écrit des octets dans les données puis les fait exécuter, ils deviennent des instructions : c'est le principe de l'<strong>injection de code</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Modèle décrit par John von Neumann en 1945, toujours la base de nos ordinateurs. Les protections modernes (mémoire non exécutable, NX) existent justement à cause de ce partage.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Le processeur et les bus</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p><strong>Dans le processeur</strong></p>
+          <ul class="dense">
+            <li><strong>Unité de contrôle</strong> : lit l'instruction suivante, la décode et pilote le reste</li>
+            <li><strong>ALU</strong> (<em>Arithmetic Logic Unit</em>, unité arithmétique et logique) : additions, soustractions, ET, OU, décalages… et met à jour les <strong>indicateurs</strong></li>
+            <li><strong>Registres</strong> : quelques cases mémoire ultra-rapides au cœur du processeur</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Les trois bus</strong></p>
+          <ul class="dense">
+            <li><strong>Bus d'adresses</strong> : <em>où</em> lire ou écrire. Sa largeur fixe la quantité de mémoire adressable</li>
+            <li><strong>Bus de données</strong> : <em>quoi</em>, la valeur transportée</li>
+            <li><strong>Bus de contrôle</strong> : <em>comment</em>, lecture ou écriture, signal d'horloge</li>
+          </ul>
+        </div>
+      </div>
+      <div class="encadre" style="margin-top: 10px;">
+        Un processeur « 64 bits » manipule des registres de 64 bits. Ses adresses aussi font 64 bits, même si seuls 48 sont utilisés en pratique (256 Tio adressables).
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Le cycle d'exécution</h2>
+    <div class="corps">
+      <div class="frise">
+        <div class="etape"><div class="date">1. Chercher</div><ul><li>Lire en mémoire l'instruction située à l'adresse contenue dans <code>rip</code></li></ul></div>
+        <div class="etape"><div class="date">2. Décoder</div><ul><li>Comprendre l'instruction : quelle opération, quels opérandes</li></ul></div>
+        <div class="etape"><div class="date">3. Exécuter</div><ul><li>Faire le calcul, lire ou écrire en mémoire, mettre à jour les registres</li></ul></div>
+        <div class="etape marine"><div class="date">4. Avancer</div><ul><li><code>rip</code> passe à l'instruction suivante, puis on recommence</li></ul></div>
+      </div>
+      <ul class="dense" style="margin-top: 22px;">
+        <li><code>rip</code> (<em>instruction pointer</em>) contient l'<strong>adresse de la prochaine instruction</strong>. Un saut ou un appel de fonction se contente de le modifier</li>
+        <li>L'<strong>horloge</strong> cadence le processeur : à 3 GHz, 3 milliards de cycles par seconde</li>
+      </ul>
+      <p class="petit muet">Les processeurs modernes exécutent plusieurs instructions en parallèle (pipeline) et en devinent la suite, mais le résultat reste celui de ce cycle simple.</p>
+    </div>
+    <aside class="notes">
+      Prendre le contrôle de rip est le but ultime d'un attaquant : celui qui choisit la prochaine instruction contrôle le programme.
+    </aside>
+  </section>
+
+  <section>
+    <h2>La hiérarchie de la mémoire</h2>
+    <div class="corps">
+      <table>
+        <tr><th>Niveau</th><th>Taille typique</th><th>Temps d'accès</th><th>Rôle</th></tr>
+        <tr><td><strong>Registres</strong></td><td>quelques centaines d'octets</td><td>&lt; 1 ns</td><td>valeurs en cours de calcul</td></tr>
+        <tr><td><strong>Caches L1, L2, L3</strong></td><td>de quelques Kio à quelques dizaines de Mio</td><td>1 à 20 ns</td><td>copies des données récentes</td></tr>
+        <tr><td><strong>Mémoire vive (RAM)</strong></td><td>8 à 64 Gio</td><td>≈ 100 ns</td><td>programmes en cours d'exécution</td></tr>
+        <tr><td><strong>SSD</strong></td><td>de 256 Gio à quelques Tio</td><td>≈ 100 µs</td><td>fichiers, conservés hors tension</td></tr>
+      </table>
+      <div class="encadre marine" style="margin-top: 12px;">
+        Plus c'est proche du processeur, plus c'est rapide et petit. En assembleur, on travaille <strong>dans les registres</strong> et on va en mémoire seulement quand il le faut.
+      </div>
+      <p class="petit muet" style="margin-top: 6px; margin-bottom: 0;">Les caches sont gérés automatiquement par le processeur : le programme ne les voit pas. 1 ns = un milliardième de seconde.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #4 LES REGISTRES X86-64                                            -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#4</div>
+    <h2>Les registres x86-64</h2>
+    <div class="sous-titre">Le processeur</div>
+  </section>
+
+  <section>
+    <h2>16 registres généraux de 64 bits</h2>
+    <div class="corps">
+      <table class="serre">
+        <tr><th>Registre</th><th>Usage habituel</th><th>Registre</th><th>Usage habituel</th></tr>
+        <tr><td><code>rax</code></td><td>résultat d'un calcul, numéro d'appel système</td><td><code>rsi</code></td><td>source, 2<sup>e</sup> argument</td></tr>
+        <tr><td><code>rbx</code></td><td>usage libre</td><td><code>rdi</code></td><td>destination, 1<sup>er</sup> argument</td></tr>
+        <tr><td><code>rcx</code></td><td>compteur de boucle</td><td><code>rbp</code></td><td>base de la pile d'une fonction</td></tr>
+        <tr><td><code>rdx</code></td><td>données, 3<sup>e</sup> argument</td><td><code>rsp</code></td><td><strong>sommet de la pile</strong> : ne pas y toucher</td></tr>
+        <tr><td colspan="4"><code>r8</code> à <code>r15</code> : huit registres supplémentaires, ajoutés avec le passage au 64 bits</td></tr>
+      </table>
+      <div class="colonnes" style="margin-top: 14px;">
+        <div class="encadre"><code>rip</code> : adresse de la prochaine instruction. On ne l'écrit jamais directement.</div>
+        <div class="encadre"><code>rflags</code> : les <strong>indicateurs</strong>, mis à jour par l'ALU après chaque calcul.</div>
+      </div>
+    </div>
+    <aside class="notes">
+      Les noms viennent du 8086 de 1978 : a = accumulateur, c = compteur, d = données, si/di = source/destination index. Le r ajouté en 64 bits signifie register.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Les sous-registres</h2>
+    <div class="corps">
+      <div class="registre">
+        <div class="ligne"><span class="nom-reg">rax</span><span class="bits b64">64 bits</span></div>
+        <div class="ligne"><span class="nom-reg">eax</span><span class="vide"></span><span class="bits b32">32 bits de poids faible</span></div>
+        <div class="ligne"><span class="nom-reg">ax</span><span class="vide v48"></span><span class="bits b16">16 bits</span></div>
+        <div class="ligne"><span class="nom-reg">ah · al</span><span class="vide v48"></span><span class="bits b8">ah</span><span class="bits b8 al">al</span></div>
+      </div>
+      <ul class="dense" style="margin-top: 14px;">
+        <li>Même principe pour <code>rbx</code>, <code>rcx</code>, <code>rdx</code> (<code>ebx</code>, <code>bx</code>, <code>bl</code>…) et pour <code>r8</code> (<code>r8d</code>, <code>r8w</code>, <code>r8b</code>)</li>
+        <li>Écrire dans <code>al</code> ou <code>ax</code> ne modifie <strong>que</strong> ces bits : le reste de <code>rax</code> est conservé</li>
+      </ul>
+      <div class="encadre marine">Piège : écrire dans <code>eax</code> <strong>met à zéro</strong> les 32 bits de poids fort de <code>rax</code>.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Les indicateurs (<em>flags</em>)</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <table class="serre">
+            <tr><th>Indicateur</th><th>Vaut 1 quand…</th></tr>
+            <tr><td><strong>ZF</strong> (<em>Zero</em>)</td><td>le résultat est nul</td></tr>
+            <tr><td><strong>SF</strong> (<em>Sign</em>)</td><td>le résultat est négatif (bit de gauche à 1)</td></tr>
+            <tr><td><strong>CF</strong> (<em>Carry</em>)</td><td>une retenue sort : débordement <strong>non signé</strong></td></tr>
+            <tr><td><strong>OF</strong> (<em>Overflow</em>)</td><td>débordement <strong>signé</strong></td></tr>
+          </table>
+        </div>
+        <div>
+          <pre class="mini" data-titre="extrait" data-extrait><code class="language-x86asm" data-trim>
+mov al, 255
+add al, 1     ; al = 0, ZF = 1, CF = 1
+mov al, 127
+add al, 1     ; al = -128, SF = 1, OF = 1
+</code></pre>
+          <p class="petit">Les indicateurs servent à <strong>prendre des décisions</strong> : « si le résultat est nul, sauter ailleurs ». C'est ainsi que s'écrivent les conditions et les boucles.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      255 + 1 sur 8 bits : en non signé on déborde (CF), en signé c'est −1 + 1 = 0, tout va bien (OF = 0).
+      127 + 1 : en non signé 128, tout va bien (CF = 0) ; en signé on passe de 127 à −128 (OF).
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #5 UN PREMIER PROGRAMME                                            -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#5</div>
+    <h2>Un premier programme</h2>
+    <div class="sous-titre">Le processeur</div>
+  </section>
+
+  <section>
+    <h2>Bonjour Manon !</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Bonjour Manon !\n"><code class="language-x86asm" data-trim>
+; hello.asm : affiche un message puis quitte
+section .data
+    msg db "Bonjour Manon !", 10    ; 10 = saut de ligne
+    len equ $ - msg                 ; longueur du message
+
+section .text
+    global _start                   ; point d'entrée
+
+_start:
+    mov rax, 1          ; appel système n° 1 : write
+    mov rdi, 1          ; descripteur 1 : la sortie standard
+    mov rsi, msg        ; adresse du message
+    mov rdx, len        ; nombre d'octets à écrire
+    syscall             ; le noyau affiche le message
+
+    mov rax, 60         ; appel système n° 60 : exit
+    mov rdi, 0          ; code de retour 0 : tout va bien
+    syscall
+</code></pre>
+        <div class="dense">
+          <ul>
+            <li><code>section .data</code> : les <strong>données</strong> du programme</li>
+            <li><code>section .text</code> : le <strong>code</strong></li>
+            <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, c'est-à-dire des noms donnés à une adresse</li>
+            <li><code>_start</code> : la première instruction exécutée</li>
+            <li><code>equ $ - msg</code> : <code>$</code> est l'adresse courante, donc la longueur vaut « ici moins le début du message »</li>
+            <li><code>;</code> commence un commentaire</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Faire taper ce programme en direct dans le Codespace, puis l'assembler et l'exécuter (diapo suivante).
+    </aside>
+  </section>
+
+  <section>
+    <h2>Assembler, lier, exécuter</h2>
+    <div class="corps">
+      <pre class="terminal" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
+$ nasm -f elf64 -g -F dwarf hello.asm -o hello.o
+$ ld hello.o -o hello
+$ ./hello
+Bonjour Manon !
+$ echo $?
+0
+</code></pre>
+      <table class="serre">
+        <tr><th>Commande</th><th>Rôle</th></tr>
+        <tr><td><code>nasm -f elf64</code></td><td>assemble au format ELF 64 bits ; <code>-g -F dwarf</code> ajoute les informations utiles au débogueur</td></tr>
+        <tr><td><code>ld … -o hello</code></td><td>lie le fichier objet et produit l'exécutable <code>hello</code></td></tr>
+        <tr><td><code>echo $?</code></td><td>affiche le <strong>code de retour</strong> du dernier programme (la valeur donnée à <code>exit</code>)</td></tr>
+      </table>
+      <p class="petit muet">Dans le modèle de dépôt, <code>make hello</code> lance les deux premières commandes pour vous.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Les appels système</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p>Un programme ne peut pas parler seul à l'écran ou au disque. Il <strong>demande ce service au noyau</strong> du système d'exploitation par un <strong>appel système</strong>.</p>
+          <ol class="dense">
+            <li>Mettre le <strong>numéro</strong> de l'appel dans <code>rax</code></li>
+            <li>Mettre les <strong>arguments</strong> dans <code>rdi</code>, <code>rsi</code>, <code>rdx</code> (puis <code>r10</code>, <code>r8</code>, <code>r9</code>)</li>
+            <li>Exécuter l'instruction <code>syscall</code></li>
+            <li>Lire le <strong>résultat</strong> dans <code>rax</code></li>
+          </ol>
+        </div>
+        <div>
+          <table class="serre">
+            <tr><th><code>rax</code></th><th>Appel</th><th>Arguments</th></tr>
+            <tr><td>0</td><td><code>read</code></td><td><code>rdi</code> = descripteur, <code>rsi</code> = adresse, <code>rdx</code> = taille max</td></tr>
+            <tr><td>1</td><td><code>write</code></td><td><code>rdi</code> = descripteur, <code>rsi</code> = adresse, <code>rdx</code> = longueur</td></tr>
+            <tr><td>60</td><td><code>exit</code></td><td><code>rdi</code> = code de retour</td></tr>
+          </table>
+          <p class="petit">Descripteurs : 0 = entrée standard (clavier), 1 = sortie standard (écran), 2 = sortie d'erreur.</p>
+          <p class="petit muet">Liste complète : <a href="https://filippo.io/linux-syscall-table/" target="_blank">table des appels système Linux x86-64</a>.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Sans exit, le processeur continue d'exécuter les octets qui suivent le programme et plante (Segmentation fault). Le montrer en direct en commentant les trois dernières lignes.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Les premières instructions</h2>
+    <div class="corps">
+      <table class="serre">
+        <tr><th>Instruction</th><th>Effet</th><th>Exemple</th></tr>
+        <tr><td><code>mov dst, src</code></td><td>copie <code>src</code> dans <code>dst</code></td><td><code>mov rax, 7</code></td></tr>
+        <tr><td><code>add dst, src</code></td><td><code>dst = dst + src</code></td><td><code>add rax, rbx</code></td></tr>
+        <tr><td><code>sub dst, src</code></td><td><code>dst = dst - src</code></td><td><code>sub rax, 6</code></td></tr>
+        <tr><td><code>imul dst, src</code></td><td><code>dst = dst × src</code> (entiers signés)</td><td><code>imul rax, 3</code></td></tr>
+        <tr><td><code>inc dst</code> / <code>dec dst</code></td><td>ajoute ou retire 1</td><td><code>inc rcx</code></td></tr>
+        <tr><td><code>neg dst</code></td><td>change le signe (complément à deux)</td><td><code>neg rax</code></td></tr>
+        <tr><td><code>xor dst, dst</code></td><td>met <code>dst</code> à zéro (écriture courte et rapide)</td><td><code>xor rdi, rdi</code></td></tr>
+      </table>
+      <ul class="dense" style="margin-top: 12px;">
+        <li>Un <strong>opérande</strong> est un registre, une valeur immédiate (<code>7</code>) ou une case mémoire (<code>[adresse]</code>)</li>
+        <li>Les deux opérandes ont <strong>la même taille</strong> et au plus un des deux est en mémoire</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Calculer et renvoyer un résultat</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre data-titre="compute.asm" data-code="30"><code class="language-x86asm" data-trim>
+; compute.asm : renvoie (7 + 5) * 3 - 6
+section .text
+    global _start
+
+_start:
+    mov rax, 7          ; rax = 7
+    add rax, 5          ; rax = 7 + 5 = 12
+    imul rax, 3         ; rax = 12 * 3 = 36
+    sub rax, 6          ; rax = 36 - 6 = 30
+
+    mov rdi, rax        ; code de retour = résultat
+    mov rax, 60         ; exit
+    syscall
+</code></pre>
+        <div class="dense">
+          <pre class="terminal compact" data-titre="Terminal"><code class="language-plaintext" data-trim>
+$ make compute
+$ ./compute
+$ echo $?
+30
+</code></pre>
+          <p>Afficher un nombre demande de le convertir en caractères. En attendant, le <strong>code de retour</strong> sert de sortie.</p>
+          <p class="petit muet">Le code de retour tient sur un octet : il est lu modulo 256.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Que contient <code>rax</code> ?</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="mini" data-titre="subregs.asm" data-code="22"><code class="language-x86asm" data-trim>
+; subregs.asm : les sous-registres de rax
+section .text
+    global _start
+
+_start:
+    mov rax, 0x1122334455667788
+    mov al, 0xFF
+    mov ax, 0xABCD
+    mov rbx, rax
+    shr rbx, 56         ; décale de 56 bits vers la droite
+    mov eax, 5
+    add rax, rbx
+
+    mov rdi, rax
+    mov rax, 60
+    syscall
+</code></pre>
+        <div>
+          <div class="reponse fragment">Après <code>mov al, 0xFF</code> : <code>0x11223344556677FF</code></div>
+          <div class="reponse fragment">Après <code>mov ax, 0xABCD</code> : <code>0x112233445566ABCD</code></div>
+          <div class="reponse fragment"><code>rbx</code> = <code>0x11</code> : les 8 bits de poids fort de <code>rax</code></div>
+          <div class="reponse fragment">Après <code>mov eax, 5</code> : <code>0x5</code>, les bits hauts sont effacés</div>
+          <div class="reponse fragment">Code de retour : 5 + <code>0x11</code> = <strong>22</strong></div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      Laisser une minute, faire répondre ligne par ligne. Puis vérifier en direct avec echo $?.
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- #6 PREMIERS PAS DANS GDB                                           -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#6</div>
+    <h2>Premiers pas dans GDB</h2>
+    <div class="sous-titre">Le processeur</div>
+  </section>
+
+  <section>
+    <h2>Un débogueur pour voir l'invisible</h2>
+    <div class="corps">
+      <p>Un programme en assembleur n'affiche presque rien. <strong>GDB</strong> (<em>GNU Debugger</em>) permet de l'exécuter <strong>instruction par instruction</strong> et d'observer les registres et la mémoire.</p>
+      <table class="serre">
+        <tr><th>Commande</th><th>Abrégé</th><th>Effet</th></tr>
+        <tr><td><code>gdb ./compute</code></td><td></td><td>ouvre le programme dans GDB (sans le lancer)</td></tr>
+        <tr><td><code>break _start</code></td><td><code>b</code></td><td>pose un <strong>point d'arrêt</strong> : l'exécution s'arrêtera là</td></tr>
+        <tr><td><code>run</code></td><td><code>r</code></td><td>lance le programme jusqu'au premier point d'arrêt</td></tr>
+        <tr><td><code>stepi</code></td><td><code>si</code></td><td>exécute <strong>une seule</strong> instruction</td></tr>
+        <tr><td><code>info registers rax rip</code></td><td><code>i r</code></td><td>affiche des registres (tous si on n'en précise aucun)</td></tr>
+        <tr><td><code>print/x $rax</code></td><td><code>p/x</code></td><td>affiche une valeur en hexadécimal (<code>/d</code> en décimal)</td></tr>
+        <tr><td><code>layout regs</code></td><td></td><td>affiche en permanence le code et les registres</td></tr>
+        <tr><td><code>continue</code> / <code>quit</code></td><td><code>c</code> / <code>q</code></td><td>reprend l'exécution / quitte GDB</td></tr>
+      </table>
+      <p class="petit muet">Une ligne vide répète la dernière commande : <kbd>Entrée</kbd> après <code>si</code> avance d'une instruction de plus.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Une session GDB</h2>
+    <div class="corps">
+      <div class="colonnes texte-code" style="grid-template-columns: .75fr 1.45fr;">
+        <div class="dense">
+          <ol>
+            <li>On s'arrête sur <code>_start</code>, <strong>avant</strong> la première instruction</li>
+            <li><code>si</code> exécute <code>mov rax, 7</code> puis <code>add rax, 5</code></li>
+            <li><code>rax</code> vaut 12 et <code>rip</code> a avancé jusqu'à l'instruction suivante</li>
+          </ol>
+          <div class="encadre marine">Le symbole <code>=&gt;</code> de <code>layout regs</code> et la valeur de <code>rip</code> désignent l'instruction <strong>qui va s'exécuter</strong>, pas celle qui vient de s'exécuter.</div>
+        </div>
+        <pre class="terminal mini" data-titre="Terminal"><code class="language-plaintext" data-trim>
+$ gdb -q ./compute
+Reading symbols from ./compute...
+(gdb) break _start
+Breakpoint 1 at 0x401000: file compute.asm, line 6.
+(gdb) run
+Starting program: /workspaces/2asse-nom-prenom/compute
+
+Breakpoint 1, _start () at compute.asm:6
+6           mov rax, 7          ; rax = 7
+(gdb) si
+7           add rax, 5          ; rax = 7 + 5 = 12
+(gdb) si
+8           imul rax, 3         ; rax = 12 * 3 = 36
+(gdb) info registers rax rip
+rax            0xc                 12
+rip            0x401009            0x401009 &lt;_start+9&gt;
+</code></pre>
+      </div>
+    </div>
+    <aside class="notes">
+      Démonstration en direct dans le Codespace. Faire remarquer que mov rax, 7 occupe 5 octets (NASM l'a raccourci en mov eax, 7, qui a le même effet) et add rax, 5 en occupe 4 : rip passe de 0x401000 à 0x401009. Sortie à revérifier dans un vrai Codespace.
+    </aside>
+  </section>
+
+  <section>
+    <h2>À retenir</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <ul class="dense">
+          <li>Le processeur exécute du <strong>langage machine</strong>. L'assembleur en est la forme lisible, propre à chaque famille de processeurs</li>
+          <li>Architecture de von Neumann : <strong>processeur</strong>, <strong>mémoire</strong> (programme et données), <strong>entrées-sorties</strong>, reliés par les <strong>bus</strong></li>
+          <li>Cycle : chercher, décoder, exécuter, avancer <code>rip</code></li>
+        </ul>
+        <ul class="dense">
+          <li>16 registres de 64 bits, des sous-registres (<code>eax</code>, <code>ax</code>, <code>al</code>) et des <strong>indicateurs</strong> (ZF, SF, CF, OF)</li>
+          <li>Appel système : numéro dans <code>rax</code>, arguments dans <code>rdi</code>, <code>rsi</code>, <code>rdx</code>, puis <code>syscall</code></li>
+          <li>GDB : <code>break</code>, <code>run</code>, <code>si</code>, <code>info registers</code></li>
+        </ul>
+      </div>
+      <div class="encadre marine" style="margin-top: 14px;">À vous : le <strong>TP1 – Premiers programmes</strong>.</div>
+    </div>
+  </section>
+
+  <section data-layout="titre">
+    <h1>Des questions ?</h1>
+    <div class="sous-titre">
+      Chris CHEVALIER<br>
+      chris.chevalier@ecole-hexagone.com
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="../assets/vendor/reveal/dist/reveal.js"></script>
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/vendor/reveal/plugin/notes/notes.js"></script>
+<script src="../assets/js/hexagone.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Compléments 2ASSE : schémas d'architecture, registres, chaîne d'assemblage
+   ========================================================================== */
+/* Trois niveaux de langage côte à côte */
+.reveal .niveaux .carte { padding: 14px 16px; }
+.reveal .niveaux .carte h3 { margin-bottom: 8px; }
+.reveal .niveaux pre { margin-bottom: 8px; }
+.reveal .niveaux p { margin: 0; }
+
+/* Frise de quatre étapes resserrée */
+.reveal .frise.chaine .etape ul { font-size: .82em; }
+
+/* Schéma SVG + texte */
+.reveal .colonnes.schema-texte { grid-template-columns: 1.35fr 1fr; gap: 26px; align-items: start; }
+.reveal svg.schema { width: 100%; height: auto; font-family: var(--police); }
+.reveal svg.schema .boite-marine { fill: var(--marine); }
+.reveal svg.schema .boite-ambre { fill: var(--ambre); }
+.reveal svg.schema .boite-claire { fill: var(--gris-clair); stroke: var(--marine); stroke-width: 2; }
+.reveal svg.schema .boite-blanche { fill: var(--blanc); stroke: var(--marine); stroke-width: 2; }
+.reveal svg.schema .titre-boite { font-size: 19px; font-weight: 700; text-anchor: middle; fill: var(--marine); }
+.reveal svg.schema .titre-boite.clair { fill: var(--blanc); }
+.reveal svg.schema .texte-boite { font-size: 17px; font-weight: 600; text-anchor: middle; fill: var(--marine); }
+.reveal svg.schema .bus-adresses { fill: var(--marine); }
+.reveal svg.schema .bus-donnees { fill: var(--ambre); }
+.reveal svg.schema .bus-controle { fill: var(--jaune); }
+.reveal svg.schema .texte-bus { font-size: 14px; font-weight: 700; text-anchor: middle; fill: var(--blanc); }
+.reveal svg.schema .texte-bus.sombre { fill: var(--marine); }
+.reveal svg.schema .lien { stroke: var(--marine); stroke-width: 4; }
+
+/* Découpage d'un registre en sous-registres (largeur proportionnelle aux bits) */
+.reveal .registre { display: flex; flex-direction: column; gap: 8px; font-size: 19px; }
+.reveal .registre .ligne { display: flex; align-items: stretch; height: 40px; }
+.reveal .registre .nom-reg { flex: 0 0 100px; font-family: var(--police-code); font-weight: 700; display: flex; align-items: center; }
+.reveal .registre .bits { display: flex; align-items: center; justify-content: center; border-radius: 6px;
+  font-weight: 700; color: var(--marine); border: 2px solid var(--marine); box-sizing: border-box; }
+.reveal .registre .vide { flex: 0 0 calc((100% - 100px) / 2); }
+.reveal .registre .vide.v48 { flex-basis: calc((100% - 100px) * .75); }
+.reveal .registre .b64 { flex: 0 0 calc(100% - 100px); background: var(--marine); color: var(--blanc); }
+.reveal .registre .b32 { flex: 0 0 calc((100% - 100px) / 2); background: var(--gris-clair); }
+.reveal .registre .b16 { flex: 0 0 calc((100% - 100px) / 4); background: var(--ambre-clair); }
+.reveal .registre .b8 { flex: 0 0 calc((100% - 100px) / 8); background: var(--ambre); }
+.reveal .registre .b8.al { background: var(--jaune); }

@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TP1 – Premiers programmes – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/css/enonce.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="panneau"><img src="../assets/charte/logo-hexagone.png" alt="École Hexagone"></div>
+  <div class="titre">
+    <h1>TP1 – Premiers programmes</h1>
+    <p><span class="code-module">2ASSE</span> – Architecture bas niveau et assembleur · Vendredi 27 novembre</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="encadre marine">
+    <span class="intitule">Ce TP en bref</span>
+    <ul>
+      <li><strong>Objectifs</strong> : assembler et exécuter vos premiers programmes x86-64, faire des calculs dans les registres, observer le processeur instruction par instruction avec GDB.</li>
+      <li>Tout se passe dans votre <strong>Codespace</strong> : un Linux x86-64 dans le navigateur, avec NASM, ld et GDB déjà installés.</li>
+      <li>Les programmes vont dans le dossier <code>tp1/</code> de votre dépôt. Les réponses aux questions <strong>Q1 à Q8</strong> vont dans <code>tp1/answers.md</code>.</li>
+      <li>Faites un commit et poussez-le à <strong>chaque étape terminée</strong>. Le TP1 compte pour <strong>15 %</strong> de la note du module. Rendu au plus tard le <strong>dimanche 6 décembre à 23h59</strong>.</li>
+    </ul>
+  </div>
+
+  <nav class="sommaire">
+    <a href="#etape-0"><span class="n">Étape 0</span><br>Le dépôt et le Codespace</a>
+    <a href="#etape-1"><span class="n">Étape 1</span><br>Bonjour</a>
+    <a href="#etape-2"><span class="n">Étape 2</span><br>Calculer</a>
+    <a href="#etape-3"><span class="n">Étape 3</span><br>Observer les registres</a>
+    <a href="#etape-4"><span class="n">Étape 4</span><br>Les indicateurs</a>
+    <a href="#etape-5"><span class="n">Étape 5</span><br>Afficher un chiffre</a>
+    <a href="#bonus"><span class="n">Bonus</span><br>Pour aller plus loin</a>
+  </nav>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-0">
+    <h2><span class="num">0</span> Le dépôt et le Codespace</h2>
+    <div class="meta"><span class="etiquette clair">GitHub · Codespaces · Git</span></div>
+
+    <p>Les trois TP vivent dans <strong>un seul dépôt</strong>, créé à partir de mon modèle. Il contient déjà la configuration du Codespace, un <code>Makefile</code> par TP et le fichier de réponses du TP1.</p>
+
+    <ol>
+      <li>Ouvrez le <a href="https://github.com/Chris-CHEVALIER/2asse-modele" target="_blank">dépôt modèle 2asse-modele</a>, cliquez sur <strong>Use this template</strong> puis <strong>Create a new repository</strong> :
+        <ul>
+          <li>nom : <code>2asse-nom-prenom</code> (avec votre nom et votre prénom) ;</li>
+          <li>visibilité : <strong>Private</strong>.</li>
+        </ul>
+      </li>
+      <li>Dans <strong>Settings → Collaborators</strong>, cliquez sur <strong>Add people</strong> et invitez <strong>Chris-CHEVALIER</strong>.</li>
+      <li>Revenez sur la page d'accueil de votre dépôt. Cliquez sur <strong>Code</strong>, onglet <strong>Codespaces</strong>, puis <strong>Create codespace on main</strong>.
+        La première ouverture prend quelques minutes : le Codespace installe NASM, ld et GDB.</li>
+      <li>Un VS Code s'ouvre dans le navigateur. Dans son terminal (en bas), vérifiez les outils :
+        <pre data-titre="Terminal"><code class="language-plaintext">
+          nasm -v
+          gdb --version
+        </code></pre>
+      </li>
+      <li>Ouvrez <code>README.md</code> et remplacez « Prénom NOM » par vos prénom et nom.</li>
+    </ol>
+
+    <div class="encadre">
+      <span class="intitule">Faire un commit et le pousser depuis le Codespace</span>
+      Dans la barre de gauche, ouvrez le panneau <strong>Source Control</strong> (l'icône en forme de branche). Écrivez un message qui dit ce qui a changé,
+      cliquez sur <strong>Commit</strong> (acceptez d'ajouter tous les fichiers modifiés), puis sur <strong>Sync Changes</strong> pour envoyer le commit sur GitHub.
+    </div>
+    <p class="muet" style="font-size: 14px;">En ligne de commande, les mêmes actions s'écrivent <code>git add -A</code>, <code>git commit -m "message"</code> puis <code>git push</code>.
+      Un Codespace s'arrête seul après 30 minutes d'inactivité. Vos fichiers y sont conservés, mais seul ce qui est poussé sur GitHub compte pour le rendu.
+      GitHub et Codespaces appartiennent à Microsoft et relèvent du droit américain (<em>Cloud Act</em>) : des alternatives ouvertes existent, comme <a href="https://codeberg.org/" target="_blank">Codeberg</a>, ou une machine virtuelle Linux sur votre ordinateur.</p>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li>votre dépôt est privé et je suis invité comme collaborateur ;</li>
+        <li><code>nasm -v</code> et <code>gdb --version</code> affichent une version dans le terminal du Codespace ;</li>
+        <li>le <code>README.md</code> porte votre nom et ce commit est poussé sur GitHub.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-1">
+    <h2><span class="num">1</span> Bonjour</h2>
+    <div class="meta"><span class="etiquette clair">Sections · appels système write et exit</span></div>
+
+    <p>Dans le terminal, placez-vous dans le dossier du TP avec <code>cd tp1</code>. Créez le fichier <code>hello.asm</code> et recopiez le programme du cours :</p>
+    <pre data-titre="tp1/hello.asm"><code class="language-x86asm">
+      ; hello.asm : affiche un message puis quitte
+      section .data
+          msg db "Bonjour Manon !", 10    ; 10 = saut de ligne
+          len equ $ - msg                 ; longueur du message
+
+      section .text
+          global _start                   ; point d'entrée
+
+      _start:
+          mov rax, 1          ; appel système n° 1 : write
+          mov rdi, 1          ; descripteur 1 : la sortie standard
+          mov rsi, msg        ; adresse du message
+          mov rdx, len        ; nombre d'octets à écrire
+          syscall             ; le noyau affiche le message
+
+          mov rax, 60         ; appel système n° 60 : exit
+          mov rdi, 0          ; code de retour 0 : tout va bien
+          syscall
+    </code></pre>
+
+    <p>Assemblez-le, exécutez-le et affichez son code de retour :</p>
+    <pre data-titre="Terminal"><code class="language-plaintext">
+      make hello
+      ./hello
+      echo $?
+    </code></pre>
+    <p class="muet" style="font-size: 14px;"><code>make hello</code> lance <code>nasm -f elf64 -g -F dwarf hello.asm -o hello.o</code> puis <code>ld hello.o -o hello</code>. Ouvrez le <code>Makefile</code> pour le constater.</p>
+
+    <p>Modifiez ensuite <code>hello.asm</code> pour que le programme :</p>
+    <ol>
+      <li>affiche <strong>deux lignes</strong> : <code>Bonjour, je suis</code> suivi de votre prénom, puis <code>Je découvre l'assembleur x86-64.</code> ;</li>
+      <li>utilise <strong>un appel <code>write</code> par ligne</strong>, avec deux messages et deux longueurs dans la section <code>.data</code> ;</li>
+      <li>se termine avec le code de retour <strong>42</strong>.</li>
+    </ol>
+
+    <h3>Questions</h3>
+    <p><strong>Q1.</strong> Faites une copie de votre programme, puis supprimez-y les trois lignes de l'appel <code>exit</code>. Assemblez et exécutez cette copie. Que se passe-t-il ? Pourquoi ?</p>
+    <p><strong>Q2.</strong> Dans le premier <code>write</code>, remplacez la longueur par <code>5</code>. Que se passe-t-il ? Pourquoi ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Chaque message a sa propre longueur : <code>len2 equ $ - line2</code> se place juste après <code>line2</code>.</li>
+        <li>Le code de retour est l'argument de <code>exit</code> : il va dans <code>rdi</code>.</li>
+        <li>Q1 : sans <code>exit</code>, que trouve le processeur après la dernière instruction ? Revoyez le cycle d'exécution.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./hello</code> affiche vos deux lignes et <code>echo $?</code> affiche <code>42</code> ;</li>
+        <li>Q1 et Q2 sont répondues dans <code>answers.md</code>, avec une explication et pas seulement une observation ;</li>
+        <li>vous avez fait un commit « Étape 1 : bonjour » et vous l'avez poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-2">
+    <h2><span class="num">2</span> Calculer</h2>
+    <div class="meta"><span class="etiquette clair">mov · add · sub · imul · inc</span></div>
+
+    <p>Un programme ne sait pas encore afficher un nombre. Il renvoie donc son résultat comme <strong>code de retour</strong>, que vous lisez avec <code>echo $?</code>.</p>
+
+    <h3><code>compute.asm</code> – Une expression</h3>
+    <p>Écrivez le programme <code>compute.asm</code>. Il calcule <code>(a + b) × c − d</code> avec <code>a = 12</code>, <code>b = 8</code>, <code>c = 4</code> et <code>d = 35</code>, puis renvoie le résultat comme code de retour.
+      Chaque opération est une instruction : le calcul ne doit pas être fait à la main.</p>
+
+    <h3><code>square.asm</code> – Un polynôme</h3>
+    <p>Écrivez le programme <code>square.asm</code>. Il calcule <code>x² − 2x + 1</code> pour <code>x = 9</code> et renvoie le résultat.
+      La valeur 9 n'apparaît <strong>qu'une seule fois</strong> dans le programme (<code>mov rbx, 9</code>) : changer cette ligne doit suffire pour calculer avec un autre <code>x</code>.</p>
+
+    <h3>Question</h3>
+    <p><strong>Q3.</strong> Modifiez temporairement <code>compute.asm</code> pour qu'il renvoie 300. Quel code de retour affiche <code>echo $?</code> ? Pourquoi ?</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li><code>imul rax, rbx</code> multiplie <code>rax</code> par <code>rbx</code> et range le résultat dans <code>rax</code>.</li>
+        <li>Pour <code>square.asm</code>, utilisez un registre par résultat intermédiaire : <code>rax</code> pour x², <code>rcx</code> pour 2x.</li>
+        <li>Q3 : sur combien de bits le code de retour est-il transmis ?</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>compute</code> renvoie <code>45</code> et <code>square</code> renvoie <code>64</code> ;</li>
+        <li>avec <code>x = 5</code>, <code>square</code> renvoie <code>16</code> sans autre modification ;</li>
+        <li>Q3 est répondue et votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-3">
+    <h2><span class="num">3</span> Observer les registres</h2>
+    <div class="meta"><span class="etiquette clair">GDB · sous-registres · complément à deux</span></div>
+
+    <p>Créez le fichier <code>observe.asm</code> avec le programme ci-dessous. Il n'affiche rien : vous allez l'exécuter <strong>pas à pas</strong> dans GDB.</p>
+    <pre data-titre="tp1/observe.asm"><code class="language-x86asm">
+      ; observe.asm : à exécuter pas à pas dans GDB
+      section .text
+          global _start
+
+      _start:
+          mov rax, 0x1122334455667788
+          mov al, 0x99
+          mov ax, 0xBEEF
+          mov eax, 0xCAFE
+          neg rax
+          mov rbx, -1
+          mov bl, 0
+
+          mov rax, 60         ; exit
+          xor rdi, rdi        ; code de retour 0
+          syscall
+    </code></pre>
+
+    <pre data-titre="Terminal"><code class="language-plaintext">
+      make observe
+      gdb -q ./observe
+    </code></pre>
+    <p>Dans GDB, posez un point d'arrêt sur <code>_start</code>, lancez le programme, puis avancez instruction par instruction :</p>
+    <table class="compact">
+      <tr><th>Commande GDB</th><th>Effet</th></tr>
+      <tr><td><code>break _start</code> puis <code>run</code></td><td>arrête le programme avant sa première instruction</td></tr>
+      <tr><td><code>si</code></td><td>exécute une instruction (<kbd>Entrée</kbd> répète la commande)</td></tr>
+      <tr><td><code>p/x $rax</code></td><td>affiche <code>rax</code> en hexadécimal</td></tr>
+      <tr><td><code>info registers rip</code></td><td>affiche l'adresse de la prochaine instruction</td></tr>
+      <tr><td><code>layout regs</code></td><td>affiche en permanence le code et les registres (les registres modifiés sont surlignés)</td></tr>
+    </table>
+
+    <h3>Questions</h3>
+    <p><strong>Q4.</strong> Complétez le tableau de <code>answers.md</code> : la valeur de <code>rax</code> (ou de <code>rbx</code>) en hexadécimal, sur 16 chiffres, après chacune des sept instructions.</p>
+    <p><strong>Q5.</strong> Pourquoi <code>mov eax, 0xCAFE</code> change-t-il davantage de bits que <code>mov ax, 0xBEEF</code> ?</p>
+    <p><strong>Q6.</strong> Combien d'octets occupe l'instruction <code>mov rax, 0x1122334455667788</code> ? Trouvez-le grâce à la valeur de <code>rip</code>, puis vérifiez avec <code>objdump -d -M intel observe</code> dans le terminal.</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Avant d'exécuter chaque <code>si</code>, essayez de deviner la nouvelle valeur. Vérifiez ensuite.</li>
+        <li><code>neg</code> calcule le complément à deux : inversez tous les bits, puis ajoutez 1.</li>
+        <li>Q6 : <code>rip</code> contient l'adresse de la prochaine instruction. Comparez sa valeur avant et après le premier <code>si</code>.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li>les sept valeurs de Q4 sont relevées dans GDB, sur 16 chiffres hexadécimaux ;</li>
+        <li>Q5 et Q6 sont répondues et votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-4">
+    <h2><span class="num">4</span> Les indicateurs</h2>
+    <div class="meta"><span class="etiquette clair">ALU · ZF · SF · CF · OF</span></div>
+
+    <p>Créez le fichier <code>flags.asm</code>. Il enchaîne quatre calculs sur 8 bits.</p>
+    <pre data-titre="tp1/flags.asm"><code class="language-x86asm">
+      ; flags.asm : à exécuter pas à pas dans GDB en observant eflags
+      section .text
+          global _start
+
+      _start:
+          mov al, 200
+          add al, 100         ; calcul 1
+          mov al, 100
+          add al, 50          ; calcul 2
+          mov al, 7
+          sub al, 7           ; calcul 3
+          mov al, 3
+          sub al, 5           ; calcul 4
+
+          mov rax, 60         ; exit
+          xor rdi, rdi
+          syscall
+    </code></pre>
+    <p>Exécutez-le pas à pas dans GDB. Après chaque calcul, affichez <code>al</code> avec <code>p $al</code> et les indicateurs avec <code>info registers eflags</code>.
+      GDB affiche entre crochets la liste des indicateurs qui valent 1, par exemple <code>[ CF ZF IF ]</code>.</p>
+    <p class="muet" style="font-size: 14px;">GDB affiche aussi PF (parité), AF (retenue auxiliaire) et IF (interruptions autorisées). Ignorez-les.
+      <code>p $al</code> affiche <code>al</code> en signé : <code>-56</code> correspond au même octet que <code>200</code>. Utilisez <code>p/u $al</code> pour l'afficher en non signé.</p>
+
+    <h3>Questions</h3>
+    <p><strong>Q7.</strong> Complétez le tableau de <code>answers.md</code> : la valeur de <code>al</code> en décimal non signé et les indicateurs ZF, SF, CF et OF après chaque calcul.</p>
+    <p><strong>Q8.</strong> Expliquez pourquoi OF vaut 1 après le calcul 2 alors que CF vaut 0.</p>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li>le tableau de Q7 est complet et correspond à ce qu'affiche GDB ;</li>
+        <li>Q8 distingue le débordement signé du débordement non signé ;</li>
+        <li>votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="etape-5">
+    <h2><span class="num">5</span> Afficher un chiffre</h2>
+    <div class="meta"><span class="etiquette clair">ASCII · écriture en mémoire</span></div>
+
+    <p>Écrivez le programme <code>digit.asm</code>. Il calcule <code>3 + 4</code> dans <code>al</code>, puis affiche :</p>
+    <pre data-titre="Affichage attendu"><code class="language-plaintext">
+      Résultat : 7
+    </code></pre>
+    <p>Le chiffre affiché doit venir du calcul : il n'est pas écrit en dur dans le message. Partez de cette section <code>.data</code> :</p>
+    <pre data-titre="tp1/digit.asm – section .data"><code class="language-x86asm">
+      section .data
+          msg db "Résultat : "
+          digit db "?", 10    ; le « ? » sera remplacé par le chiffre
+          len equ $ - msg
+    </code></pre>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>Le code ASCII d'un chiffre est ce chiffre plus <code>'0'</code> (soit <code>0x30</code>) : <code>add al, '0'</code>.</li>
+        <li><code>mov [digit], al</code> écrit l'octet contenu dans <code>al</code> à l'adresse <code>digit</code>. Les crochets désignent la <strong>case mémoire</strong> située à cette adresse.</li>
+        <li><code>len</code> couvre les deux étiquettes : il est calculé depuis <code>msg</code>, après la dernière.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./digit</code> affiche <code>Résultat : 7</code> suivi d'un saut de ligne ;</li>
+        <li>en remplaçant <code>4</code> par <code>5</code> dans le calcul, il affiche <code>Résultat : 8</code> ;</li>
+        <li>votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="bonus">
+    <h2><span class="num">+</span> Pour aller plus loin</h2>
+
+    <h3><code>number.asm</code> – Deux chiffres</h3>
+    <p>Écrivez le programme <code>number.asm</code>. Il calcule <code>6 × 7</code> puis affiche <code>Cosmo a 42 ans.</code>, chaque chiffre venant du calcul.</p>
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li><code>div rbx</code> divise le nombre de 128 bits formé par <code>rdx</code> et <code>rax</code> par <code>rbx</code>. Le quotient arrive dans <code>rax</code> et le reste dans <code>rdx</code>.</li>
+        <li>Mettez donc <code>rdx</code> à zéro avant la division : <code>xor rdx, rdx</code>.</li>
+        <li>42 divisé par 10 donne 4 (les dizaines), reste 2 (les unités).</li>
+      </ul>
+    </details>
+
+    <h3>Défi – Majuscules</h3>
+    <p>Dans un nouveau programme, déclarez le message <code>"cosmo", 10</code> et affichez <code>COSMO</code> en modifiant chaque lettre en mémoire, sans réécrire le message.
+      Revoyez l'écart entre <code>'a'</code> et <code>'A'</code> dans la table ASCII. L'instruction <code>sub byte [msg + 1], 32</code> modifie le deuxième octet du message.</p>
+  </section>
+
+</main>
+
+<footer class="pied">Chris CHEVALIER · 2ASSE – Architecture bas niveau et assembleur · École Hexagone</footer>
+
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/js/enonce.js"></script>
+</body>
+</html>

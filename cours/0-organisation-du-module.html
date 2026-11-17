@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Organisation du module – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../assets/vendor/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/hexagone.css">
+</head>
+<body data-pied="2ASSE – Architecture bas niveau et assembleur · Organisation du module">
+<div class="reveal">
+<div class="slides">
+
+  <!-- ================================================================== -->
+  <section data-layout="titre">
+    <h1>Organisation du module</h1>
+    <div class="sous-titre">
+      <span class="code-module">2ASSE</span> – Architecture bas niveau et assembleur<br>
+      Chris CHEVALIER
+    </div>
+    <aside class="notes">
+      Accueil. Nouveau module cette année : je l'ai ajouté au programme pour préparer le parcours cyber du mastère.
+      Tour de table : qui a déjà ouvert un débogueur ? Qui a déjà fait un CTF ?
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <section data-layout="sommaire">
+    <h1>Sommaire</h1>
+    <ol>
+      <li>Le module</li>
+      <li>Le déroulé</li>
+      <li>Modalités d'évaluation</li>
+    </ol>
+  </section>
+
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#1</div>
+    <h2>Le module</h2>
+    <div class="sous-titre">Organisation du module</div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>Pourquoi apprendre l'assembleur ?</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p><strong>Comprendre ce que fait vraiment la machine :</strong></p>
+          <ul class="dense">
+            <li>Le processeur n'exécute <strong>ni Python ni C</strong> : il exécute des instructions en binaire</li>
+            <li>L'assembleur est la forme lisible de ces instructions</li>
+            <li>Mémoire, pile, pointeurs, appels système : tout devient concret</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Une compétence clé en cybersécurité :</strong></p>
+          <ul class="dense">
+            <li><strong>Rétro-ingénierie</strong> : comprendre un programme sans son code source</li>
+            <li><strong>Analyse de logiciels malveillants</strong></li>
+            <li><strong>Recherche de vulnérabilités</strong> et épreuves des CTF</li>
+          </ul>
+        </div>
+      </div>
+      <div class="encadre" style="margin: 4px 0 8px;">
+        Ce module prépare directement le <strong>parcours cyber du mastère</strong>. Personne ne vous demandera d'écrire un logiciel entier en assembleur,
+        mais vous devrez savoir <strong>le lire</strong>.
+      </div>
+      <p class="petit muet" style="margin: 0;">Un <strong>CTF</strong> (<em>Capture The Flag</em>) est une compétition de sécurité informatique où l'on résout des épreuves pour trouver des « drapeaux » cachés.</p>
+    </div>
+    <aside class="notes">
+      Exemple parlant : un analyste qui reçoit un rançongiciel n'a jamais son code source. Il n'a que le binaire, donc l'assembleur.
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>Objectifs du module</h2>
+    <div class="corps">
+      <p>À l'issue du module, vous serez capables de :</p>
+      <ul>
+        <li><strong>Décrire l'architecture d'un processeur</strong> : registres, unité arithmétique et logique, bus, mémoire</li>
+        <li><strong>Écrire, assembler et exécuter</strong> des programmes simples en assembleur x86-64</li>
+        <li><strong>Manipuler la mémoire</strong> : adresses, données, pile</li>
+        <li><strong>Utiliser les appels système</strong> pour afficher, lire au clavier ou quitter un programme</li>
+        <li><strong>Déboguer un programme instruction par instruction</strong> avec GDB, jusqu'à analyser un binaire inconnu</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>Programme</h2>
+    <div class="corps">
+      <div class="colonnes c3 dense">
+        <div class="carte">
+          <h3>Cours 1 – Le processeur</h3>
+          Architecture de von Neumann, registres, unité arithmétique et logique, bus, premier programme, premiers pas dans GDB
+        </div>
+        <div class="carte">
+          <h3>Cours 2 – Mémoire et instructions</h3>
+          Sauts et boucles, adresses et tableaux, pile et fonctions, appels système et interruptions
+        </div>
+        <div class="carte">
+          <h3>Cours 3 – Débogage et rétro-ingénierie</h3>
+          GDB en profondeur, du C à l'assembleur, analyser un binaire sans son code source
+        </div>
+      </div>
+      <div class="carte pleine" style="margin-top: 22px;">
+        <h3>Trois TP qui montent en puissance</h3>
+        TP1 : premiers programmes · TP2 : boucles, tableaux et fonctions · TP3 : le <strong>défi crackme</strong>, retrouver le mot de passe d'un programme inconnu
+      </div>
+      <p class="petit muet" style="margin-top: 12px;">Un <strong>crackme</strong> est un petit programme écrit pour s'entraîner à la rétro-ingénierie : il demande un mot de passe qu'il faut retrouver en l'analysant.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#2</div>
+    <h2>Le déroulé</h2>
+    <div class="sous-titre">Organisation du module</div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>Calendrier</h2>
+    <div class="corps">
+      <div class="frise">
+        <div class="etape">
+          <div class="date">Ven. 27 novembre</div>
+          <ul>
+            <li>Organisation et cours 1</li>
+            <li>TP1 – Premiers programmes</li>
+            <li>12h45 : Kahoot</li>
+          </ul>
+        </div>
+        <div class="etape">
+          <div class="date">Jeu. 3 décembre</div>
+          <ul>
+            <li>Cours 2</li>
+            <li>TP2 – Boucles, tableaux et fonctions</li>
+          </ul>
+        </div>
+        <div class="etape">
+          <div class="date">Ven. 4 décembre</div>
+          <ul>
+            <li>Cours 3 puis TP3 – Le défi crackme</li>
+            <li>12h15 : Kahoot de révision</li>
+            <li>12h30 : examen écrit</li>
+          </ul>
+        </div>
+        <div class="etape marine">
+          <div class="date">Jusqu'au dim. 6 décembre</div>
+          <ul>
+            <li>Fin des TP chez vous</li>
+            <li>Rendu <strong>à 23h59 au plus tard</strong></li>
+          </ul>
+        </div>
+      </div>
+      <div class="encadre" style="margin-top: 26px;">
+        Horaires des trois séances : <strong>9h – 13h</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>Une séance type</h2>
+    <div class="corps">
+      <table>
+        <tr><th style="width: 190px;">Moment</th><th>Déroulé</th></tr>
+        <tr><td>Début</td><td>Cours court, avec des démonstrations en direct et des quiz « Que contient ce registre ? »</td></tr>
+        <tr><td>Cœur</td><td>TP, avec un accompagnement individuel</td></tr>
+        <tr><td>Fin</td><td>Kahoot le 27/11, Kahoot de révision et examen écrit le 4/12</td></tr>
+      </table>
+      <div class="encadre marine" style="margin-top: 22px;">
+        En assembleur, une erreur ne produit souvent aucun message : le programme plante ou affiche n'importe quoi.
+        Levez la main dès que vous êtes bloqués. <strong>Rester bloqué 20 minutes, c'est 20 minutes perdues</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>Votre environnement de travail</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul class="dense">
+            <li>Un <strong>Linux x86-64 dans le navigateur</strong> grâce à <a href="https://github.com/features/codespaces" target="_blank"><strong>GitHub Codespaces</strong></a></li>
+            <li>Tout est déjà installé : <strong>NASM</strong> (l'assembleur), <strong>ld</strong> (l'éditeur de liens) et <strong>GDB</strong> (le débogueur)</li>
+            <li>Rien à installer : fonctionne sur Windows, macOS (y compris les Mac à puce Apple) et Linux</li>
+            <li>Votre compte <strong>GitHub</strong> suffit, avec la double authentification activée</li>
+          </ul>
+        </div>
+        <div>
+          <div class="encadre marine">
+            Au début du TP1, chacun crée son dépôt à partir de mon modèle puis ouvre son Codespace. Nous vérifions ensemble que tout fonctionne.
+          </div>
+          <p class="petit muet" style="margin-top: 12px;">Le quota gratuit de Codespaces (60 heures par mois sur une machine à 2 cœurs) suffit largement. Arrêtez votre Codespace en fin de séance.</p>
+        </div>
+      </div>
+      <p class="petit muet" style="margin-top: 14px;">GitHub et Codespaces appartiennent à Microsoft et relèvent du droit américain (<em>Cloud Act</em>) : votre code est hébergé sur ses serveurs. Je les utilise parce que je les maîtrise et qu'ils évitent toute installation.
+        Une machine virtuelle Linux, <a href="https://learn.microsoft.com/fr-fr/windows/wsl/" target="_blank">WSL</a> sous Windows ou un hébergeur ouvert comme <a href="https://codeberg.org/" target="_blank">Codeberg</a> font aussi l'affaire.</p>
+    </div>
+    <aside class="notes">
+      Pourquoi pas une installation locale : les Mac récents ont un processeur ARM, pas x86-64. Codespaces met tout le monde sur la même machine.
+    </aside>
+  </section>
+
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#3</div>
+    <h2>Modalités d'évaluation</h2>
+    <div class="sous-titre">Organisation du module</div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>Modalités d'évaluation</h2>
+    <div class="corps">
+      <table>
+        <tr><th>Épreuve</th><th>Conditions</th><th class="num">Poids</th></tr>
+        <tr><td><strong>TP1</strong> <span class="etiquette">Pratique</span></td><td>Premiers programmes et observations dans GDB</td><td class="num"><strong>15 %</strong></td></tr>
+        <tr><td><strong>TP2</strong> <span class="etiquette">Pratique</span></td><td>Boucles, tableaux et fonctions</td><td class="num"><strong>20 %</strong></td></tr>
+        <tr><td><strong>TP3 – Défi crackme</strong> <span class="etiquette">Pratique</span></td><td>Analyse d'un programme inconnu et compte rendu de votre démarche</td><td class="num"><strong>25 %</strong></td></tr>
+        <tr><td><strong>Examen écrit</strong> <span class="etiquette ambre">Théorie</span></td><td>Le 4/12 à 12h30, 30 min, sur ordinateur, sans documents ni IA</td><td class="num"><strong>40 %</strong></td></tr>
+      </table>
+      <div class="encadre" style="margin-top: 22px;">
+        Les trois TP sont rendus sur votre dépôt GitHub <strong>au plus tard le dimanche 6 décembre à 23h59</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>TP rendus et examen écrit</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div class="carte">
+          <h3>Rendu sur GitHub</h3>
+          <ul>
+            <li>Un dépôt <strong>privé</strong> <code>2asse-nom-prenom</code>, créé à partir de mon modèle</li>
+            <li>Invitez <strong>Chris-CHEVALIER</strong> dès le 27 novembre</li>
+            <li><strong>Des commits réguliers</strong>, au moins un par étape terminée</li>
+            <li>Les réponses aux questions de chaque TP dans son fichier <code>answers.md</code></li>
+          </ul>
+        </div>
+        <div class="carte">
+          <h3>Examen écrit · 30 min · le 4/12 à 12h30</h3>
+          <ul>
+            <li><strong>10 questions ouvertes</strong> sur les trois cours</li>
+            <li>Plusieurs questions portent sur des <strong>extraits d'assembleur</strong> à dérouler à la main</li>
+            <li>Sur un questionnaire Microsoft Forms, sans documents ni IA</li>
+          </ul>
+        </div>
+      </div>
+      <p class="petit muet" style="margin-top: 14px;">Le dernier commit poussé avant le dimanche 6 décembre à 23h59 fait foi.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section>
+    <h2>L'IA générative : autorisée, à une condition</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <ul>
+            <li>ChatGPT, Claude, Copilot… sont <strong>autorisés</strong> pour les TP</li>
+            <li>Vous devez <strong>comprendre chaque ligne</strong> rendue : en séance, je peux vous demander d'en expliquer une</li>
+            <li>Déclarez votre usage dans le <code>README.md</code> du dépôt : quels outils, pour quoi faire</li>
+          </ul>
+        </div>
+        <div>
+          <ul>
+            <li>Le compte rendu du crackme décrit <strong>votre</strong> démarche : un mot de passe sans démarche ne rapporte rien</li>
+            <li>L'examen écrit se fait <strong>sans IA</strong></li>
+            <li>L'entraide est encouragée. Expliquer, oui ; donner son code, non</li>
+          </ul>
+        </div>
+      </div>
+      <div class="encadre" style="margin-top: 8px;">
+        Conseil : l'IA explique bien une instruction ou un message d'erreur. Mais l'écrit et le mastère cyber vous demanderont de
+        <strong>lire l'assembleur seuls</strong> : entraînez-vous à le faire.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section data-layout="titre">
+    <h1>Des questions ?</h1>
+    <div class="sous-titre">
+      Chris CHEVALIER<br>
+      chris.chevalier@ecole-hexagone.com
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="../assets/vendor/reveal/dist/reveal.js"></script>
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/vendor/reveal/plugin/notes/notes.js"></script>
+<script src="../assets/js/hexagone.js"></script>
+</body>
+</html>
