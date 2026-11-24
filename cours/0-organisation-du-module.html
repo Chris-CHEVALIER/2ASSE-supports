@@ -68,7 +68,6 @@
         Ce module prépare directement le <strong>parcours cyber du mastère</strong>. Personne ne vous demandera d'écrire un logiciel entier en assembleur,
         mais vous devrez savoir <strong>le lire</strong>.
       </div>
-      <p class="petit muet" style="margin: 0;">Un <strong>CTF</strong> (<em>Capture The Flag</em>) est une compétition de sécurité informatique où l'on résout des épreuves pour trouver des « drapeaux » cachés.</p>
     </div>
     <aside class="notes">
       Exemple parlant : un analyste qui reçoit un rançongiciel n'a jamais son code source. Il n'a que le binaire, donc l'assembleur.
@@ -87,6 +86,7 @@
         <li><strong>Utiliser les appels système</strong> pour afficher, lire au clavier ou quitter un programme</li>
         <li><strong>Déboguer un programme instruction par instruction</strong> avec GDB, jusqu'à analyser un binaire inconnu</li>
       </ul>
+      <p class="petit muet" style="margin-top: 16px;">💡 <strong>x86-64</strong> est la famille de processeurs 64 bits d'Intel et d'AMD, celle de la plupart des PC et des serveurs. <strong>GDB</strong> (<em>GNU Debugger</em>) est le débogueur libre du projet GNU : il exécute un programme pas à pas pour l'observer.</p>
     </div>
   </section>
 
@@ -112,7 +112,7 @@
         <h3>Trois TP qui montent en puissance</h3>
         TP1 : premiers programmes · TP2 : boucles, tableaux et fonctions · TP3 : le <strong>défi crackme</strong>, retrouver le mot de passe d'un programme inconnu
       </div>
-      <p class="petit muet" style="margin-top: 12px;">Un <strong>crackme</strong> est un petit programme écrit pour s'entraîner à la rétro-ingénierie : il demande un mot de passe qu'il faut retrouver en l'analysant.</p>
+      <p class="petit muet" style="margin-top: 12px;">💡 Un <strong>crackme</strong> est un petit programme écrit pour s'entraîner à la rétro-ingénierie : il demande un mot de passe qu'il faut retrouver en l'analysant.</p>
     </div>
   </section>
 
@@ -127,7 +127,7 @@
   <section>
     <h2>Calendrier</h2>
     <div class="corps">
-      <div class="frise">
+      <div class="frise" style="grid-template-columns: repeat(5, 1fr);">
         <div class="etape">
           <div class="date">Ven. 27 novembre</div>
           <ul>
@@ -147,20 +147,26 @@
           <div class="date">Ven. 4 décembre</div>
           <ul>
             <li>Cours 3 puis TP3 – Le défi crackme</li>
-            <li>12h15 : Kahoot de révision</li>
-            <li>12h30 : examen écrit</li>
+            <li>12h45 : Kahoot de révision</li>
           </ul>
         </div>
         <div class="etape marine">
-          <div class="date">Jusqu'au dim. 6 décembre</div>
+          <div class="date">Dim. 6 décembre</div>
           <ul>
             <li>Fin des TP chez vous</li>
-            <li>Rendu <strong>à 23h59 au plus tard</strong></li>
+            <li>Rendu des TP <strong>à 23h59 au plus tard</strong></li>
+          </ul>
+        </div>
+        <div class="etape marine">
+          <div class="date">Jeu. 10 décembre</div>
+          <ul>
+            <li>16h : examen écrit</li>
+            <li>30 min, en salle</li>
           </ul>
         </div>
       </div>
       <div class="encadre" style="margin-top: 26px;">
-        Horaires des trois séances : <strong>9h – 13h</strong>.
+        Horaires des trois séances : <strong>9h – 13h</strong>. L'examen écrit a lieu après les séances, pour vous laisser le temps de réviser.
       </div>
     </div>
   </section>
@@ -171,9 +177,9 @@
     <div class="corps">
       <table>
         <tr><th style="width: 190px;">Moment</th><th>Déroulé</th></tr>
-        <tr><td>Début</td><td>Cours court, avec des démonstrations en direct et des quiz « Que contient ce registre ? »</td></tr>
+        <tr><td>Début</td><td>Cours, avec des démonstrations en direct et des quiz</td></tr>
         <tr><td>Cœur</td><td>TP, avec un accompagnement individuel</td></tr>
-        <tr><td>Fin</td><td>Kahoot le 27/11, Kahoot de révision et examen écrit le 4/12</td></tr>
+        <tr><td>Fin</td><td>Kahoot le 27/11, Kahoot de révision le 4/12</td></tr>
       </table>
       <div class="encadre marine" style="margin-top: 22px;">
         En assembleur, une erreur ne produit souvent aucun message : le programme plante ou affiche n'importe quoi.
@@ -190,19 +196,20 @@
         <div>
           <ul class="dense">
             <li>Un <strong>Linux x86-64 dans le navigateur</strong> grâce à <a href="https://github.com/features/codespaces" target="_blank"><strong>GitHub Codespaces</strong></a></li>
-            <li>Tout est déjà installé : <strong>NASM</strong> (l'assembleur), <strong>ld</strong> (l'éditeur de liens) et <strong>GDB</strong> (le débogueur)</li>
-            <li>Rien à installer : fonctionne sur Windows, macOS (y compris les Mac à puce Apple) et Linux</li>
-            <li>Votre compte <strong>GitHub</strong> suffit, avec la double authentification activée</li>
+            <li>Tout est déjà installé : <strong>NASM</strong> (<em>Netwide Assembler</em>, l'assembleur), <strong>ld</strong> (le <em>linker</em> GNU, l'éditeur de liens) et <strong>GDB</strong> (<em>GNU Debugger</em>, le débogueur)</li>
+            <li>Rien à installer : fonctionne sur Windows, macOS et Linux</li>
+            <li>Votre compte <strong>GitHub</strong> suffit</li>
           </ul>
         </div>
         <div>
           <div class="encadre marine">
             Au début du TP1, chacun crée son dépôt à partir de mon modèle puis ouvre son Codespace : NASM, ld et GDB s'y installent tout seuls. Nous vérifions ensemble que tout fonctionne.
           </div>
-          <p class="petit muet" style="margin-top: 12px;">Le quota gratuit de Codespaces (60 heures par mois sur une machine à 2 cœurs) suffit largement. Arrêtez votre Codespace en fin de séance.</p>
+          <p class="petit muet" style="margin-top: 12px;">Le quota gratuit de Codespaces (60 heures par mois sur une machine à 2 cœurs) suffit largement.</p>
+          <p class="petit" style="margin-top: 8px;"><strong>⚠️ Arrêtez votre Codespace en fin de séance.</strong></p>
         </div>
       </div>
-      <p class="petit muet" style="margin-top: 14px;">GitHub et Codespaces appartiennent à Microsoft et relèvent du droit américain (<em>Cloud Act</em>) : votre code est hébergé sur ses serveurs. Je les utilise parce que je les maîtrise et qu'ils évitent toute installation.
+      <p class="petit muet" style="margin-top: 14px;"><strong>Souveraineté numérique.</strong> GitHub et Codespaces appartiennent à Microsoft et relèvent du droit américain (<em>Cloud Act</em>) : votre code est hébergé sur ses serveurs. Je les utilise parce que je les maîtrise et qu'ils évitent toute installation.
         Une machine virtuelle Linux, <a href="https://learn.microsoft.com/fr-fr/windows/wsl/" target="_blank">WSL</a> sous Windows ou un hébergeur ouvert comme <a href="https://codeberg.org/" target="_blank">Codeberg</a> font aussi l'affaire.</p>
     </div>
     <aside class="notes">
@@ -226,7 +233,7 @@
         <tr><td><strong>TP1</strong> <span class="etiquette">Pratique</span></td><td>Premiers programmes et observations dans GDB</td><td class="num"><strong>15 %</strong></td></tr>
         <tr><td><strong>TP2</strong> <span class="etiquette">Pratique</span></td><td>Boucles, tableaux et fonctions</td><td class="num"><strong>20 %</strong></td></tr>
         <tr><td><strong>TP3 – Défi crackme</strong> <span class="etiquette">Pratique</span></td><td>Analyse d'un programme inconnu et compte rendu de votre démarche</td><td class="num"><strong>25 %</strong></td></tr>
-        <tr><td><strong>Examen écrit</strong> <span class="etiquette ambre">Théorie</span></td><td>Le 4/12 à 12h30, 30 min, sur ordinateur, sans documents ni IA</td><td class="num"><strong>40 %</strong></td></tr>
+        <tr><td><strong>Examen écrit</strong> <span class="etiquette ambre">Théorie</span></td><td>Le jeudi 10/12 à 16h, 30 min, en salle, sur ordinateur, sans documents ni IA</td><td class="num"><strong>40 %</strong></td></tr>
       </table>
       <div class="encadre" style="margin-top: 22px;">
         Les trois TP sont rendus sur votre dépôt GitHub <strong>au plus tard le dimanche 6 décembre à 23h59</strong>.
@@ -243,13 +250,13 @@
           <h3>Rendu sur GitHub</h3>
           <ul>
             <li>Un dépôt <strong>privé</strong> <code>2asse-nom-prenom</code>, créé à partir de mon modèle</li>
-            <li>Invitez <strong>Chris-CHEVALIER</strong> dès le 27 novembre</li>
+            <li>Invitez <strong>Chris-CHEVALIER</strong> dès aujourd'hui</li>
             <li><strong>Des commits réguliers</strong>, au moins un par étape terminée</li>
             <li>Les réponses aux questions de chaque TP dans son fichier <code>answers.md</code></li>
           </ul>
         </div>
         <div class="carte">
-          <h3>Examen écrit · 30 min · le 4/12 à 12h30</h3>
+          <h3>Examen écrit · 30 min · le 10/12 à 16h</h3>
           <ul>
             <li><strong>10 questions ouvertes</strong> sur les trois cours</li>
             <li>Plusieurs questions portent sur des <strong>extraits d'assembleur</strong> à dérouler à la main</li>

@@ -100,7 +100,7 @@ b8 07 00 00 00
           Le mot « assembleur » désigne à la fois le <strong>langage</strong> et l'<strong>outil</strong> qui le traduit (ici NASM, le <em>Netwide Assembler</em>).
         </div>
       </div>
-      <p class="petit muet" style="margin-top: 10px;">Le fichier <code>.o</code> est un <strong>fichier objet</strong> : du code machine dont les adresses ne sont pas encore fixées. Sous Linux, l'exécutable final est au format <strong>ELF</strong> (<em>Executable and Linkable Format</em>).</p>
+      <p class="petit muet" style="margin-top: 10px;">💡 Le fichier <code>.o</code> est un <strong>fichier objet</strong> : du code machine dont les adresses ne sont pas encore fixées. Sous Linux, l'exécutable final est au format <strong>ELF</strong> (<em>Executable and Linkable Format</em>).</p>
     </div>
   </section>
 
@@ -157,7 +157,7 @@ b8 07 00 00 00
             <tr><td>32 bits</td><td><code>dword</code> (double mot)</td><td><code>dd</code></td></tr>
             <tr><td>64 bits</td><td><code>qword</code> (quadruple mot)</td><td><code>dq</code></td></tr>
           </table>
-          <p class="petit muet"><code>db</code> signifie <em>define byte</em> : il écrit des octets dans le programme.</p>
+          <p class="petit muet">💡 <code>db</code> signifie <em>define byte</em> : il écrit des octets dans le programme.</p>
         </div>
       </div>
     </div>
@@ -365,7 +365,7 @@ b8 07 00 00 00
       <div class="encadre marine" style="margin-top: 12px;">
         Plus c'est proche du processeur, plus c'est rapide et petit. En assembleur, on travaille <strong>dans les registres</strong> et on va en mémoire seulement quand il le faut.
       </div>
-      <p class="petit muet" style="margin-top: 6px; margin-bottom: 0;">Les caches sont gérés automatiquement par le processeur : le programme ne les voit pas. 1 ns = un milliardième de seconde.</p>
+      <p class="petit muet" style="margin-top: 6px; margin-bottom: 0;">💡 Les caches sont gérés automatiquement par le processeur : le programme ne les voit pas. 1 ns = un milliardième de seconde.</p>
     </div>
   </section>
 
@@ -456,13 +456,13 @@ add al, 1     ; al = -128, SF = 1, OF = 1
   </section>
 
   <section>
-    <h2>Bonjour Manon !</h2>
+    <h2>Hello World!</h2>
     <div class="corps">
       <div class="colonnes code-texte">
-        <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Bonjour Manon !\n"><code class="language-x86asm" data-trim>
+        <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
 ; hello.asm : affiche un message puis quitte
 section .data
-    msg db "Bonjour Manon !", 10    ; 10 = saut de ligne
+    msg db "Hello World!", 10       ; 10 = saut de ligne
     len equ $ - msg                 ; longueur du message
 
 section .text
@@ -503,7 +503,7 @@ _start:
 $ nasm -f elf64 -g -F dwarf hello.asm -o hello.o
 $ ld hello.o -o hello
 $ ./hello
-Bonjour Manon !
+Hello World!
 $ echo $?
 0
 </code></pre>

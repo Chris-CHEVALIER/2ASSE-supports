@@ -114,7 +114,7 @@ int main(void)
           <pre class="terminal mini" data-titre="Terminal" data-extrait><code class="language-plaintext" data-trim>
 $ gcc -O0 -S -masm=intel bonus.c
 </code></pre>
-          <p class="petit muet" style="margin: 0;"><code>-S</code> s'arrête à l'assembleur (fichier <code>bonus.s</code>), <code>-masm=intel</code> choisit la syntaxe du cours, <code>-O0</code> désactive l'optimisation.</p>
+          <p class="petit muet" style="margin: 0;">💡 <code>-S</code> s'arrête à l'assembleur (fichier <code>bonus.s</code>), <code>-masm=intel</code> choisit la syntaxe du cours, <code>-O0</code> désactive l'optimisation.</p>
         </div>
         <div>
           <pre class="mini" data-titre="bonus.s (extrait)" data-extrait><code class="language-x86asm" data-trim>
@@ -231,7 +231,7 @@ $ nm pin | grep " T "
         <li><code>strings</code> : les messages affichés trahissent le rôle du programme. Ici, un contrôle d'accès</li>
         <li><code>nm</code> : la liste des <strong>symboles</strong> (noms de fonctions et de variables). <code>T</code> désigne une fonction du code</li>
       </ul>
-      <p class="petit muet">Un binaire peut être <strong>« strippé »</strong> (<code>strip</code>) : ses symboles sont supprimés et <code>nm</code> n'affiche plus rien. L'analyse reste possible, mais plus longue.</p>
+      <p class="petit muet">💡 Un binaire peut être <strong>« strippé »</strong> (<code>strip</code>) : ses symboles sont supprimés et <code>nm</code> n'affiche plus rien. L'analyse reste possible, mais plus longue.</p>
     </div>
   </section>
 
@@ -296,7 +296,7 @@ $ nm pin | grep " T "
       <div class="encadre marine" style="margin-top: 10px;">
         Tout ce que le processeur peut lire, un analyste peut le lire aussi. Le défi crackme du TP3 vous le fera constater.
       </div>
-      <p class="petit muet">Une <strong>empreinte</strong> est le résultat d'une fonction à sens unique : on ne peut pas retrouver le mot de passe à partir d'elle. Le <strong>sel</strong> est une valeur aléatoire ajoutée avant le calcul, pour que deux mots de passe identiques n'aient pas la même empreinte.</p>
+      <p class="petit muet">💡 Une <strong>empreinte</strong> est le résultat d'une fonction à sens unique : on ne peut pas retrouver le mot de passe à partir d'elle. Le <strong>sel</strong> est une valeur aléatoire ajoutée avant le calcul, pour que deux mots de passe identiques n'aient pas la même empreinte.</p>
     </div>
   </section>
 

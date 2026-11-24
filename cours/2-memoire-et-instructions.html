@@ -100,7 +100,7 @@
             <tr><td>tas</td><td>la mémoire demandée pendant l'exécution (<code>malloc</code> en C)</td></tr>
             <tr><td>pile</td><td>les adresses de retour, les variables locales, les sauvegardes de registres</td></tr>
           </table>
-          <p class="petit muet">Chaque processus a son propre <strong>espace d'adressage</strong> : ses adresses sont virtuelles et le système les traduit en adresses physiques. Deux programmes peuvent utiliser la même adresse sans se gêner.</p>
+          <p class="petit muet">💡 Chaque processus a son propre <strong>espace d'adressage</strong> : ses adresses sont virtuelles et le système les traduit en adresses physiques. Deux programmes peuvent utiliser la même adresse sans se gêner.</p>
         </div>
       </div>
     </div>
@@ -175,7 +175,7 @@ _start:
         <div class="encadre"><code>mov rax, [rsi]</code> <strong>lit</strong> la mémoire à l'adresse <code>rsi</code>.</div>
         <div class="encadre"><code>lea rax, [rsi + 8]</code> <strong>calcule</strong> l'adresse sans rien lire : <code>rax = rsi + 8</code>.</div>
       </div>
-      <p class="petit muet"><code>lea</code> signifie <em>Load Effective Address</em> (charger l'adresse calculée).</p>
+      <p class="petit muet">💡 <code>lea</code> signifie <em>Load Effective Address</em> (charger l'adresse calculée).</p>
     </div>
   </section>
 
@@ -205,7 +205,7 @@ grades dq 12, 15, 9, 17, 14
           </div>
         </div>
       </div>
-      <p class="petit muet">Ce manque de contrôle est à l'origine des <strong>dépassements de tampon</strong> (<em>buffer overflow</em>), l'une des failles de sécurité les plus exploitées : écrire au-delà d'un tableau écrase ce qui le suit.</p>
+      <p class="petit muet">💡 Ce manque de contrôle est à l'origine des <strong>dépassements de tampon</strong> (<em>buffer overflow</em>), l'une des failles de sécurité les plus exploitées : écrire au-delà d'un tableau écrase ce qui le suit.</p>
     </div>
   </section>
 
@@ -240,7 +240,7 @@ grades dq 12, 15, 9, 17, 14
             <tr><td><code>a &gt; b</code></td><td><code>jg</code></td><td><code>ja</code></td></tr>
             <tr><td><code>a &gt;= b</code></td><td><code>jge</code></td><td><code>jae</code></td></tr>
           </table>
-          <p class="petit muet">l = <em>less</em>, g = <em>greater</em> (signé) ; b = <em>below</em>, a = <em>above</em> (non signé) ; e = <em>equal</em>.</p>
+          <p class="petit muet">💡 l = <em>less</em>, g = <em>greater</em> (signé) ; b = <em>below</em>, a = <em>above</em> (non signé) ; e = <em>equal</em>.</p>
         </div>
       </div>
     </div>
@@ -628,7 +628,7 @@ _start:
             <li>Le sommet de la pile contient <code>0x401012</code></li>
             <li>C'est l'adresse de <code>mov rbx, rax</code>, l'instruction qui suit le <code>call</code> : <code>ret</code> y reviendra</li>
           </ol>
-          <p class="petit muet"><code>bt</code> (<em>backtrace</em>) affiche la chaîne des appels en cours.</p>
+          <p class="petit muet">💡 <code>bt</code> (<em>backtrace</em>) affiche la chaîne des appels en cours.</p>
         </div>
         <pre class="terminal mini" data-titre="Terminal"><code class="language-plaintext" data-trim>
 $ gdb -q ./square
