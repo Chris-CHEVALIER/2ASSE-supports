@@ -186,7 +186,7 @@ b8 07 00 00 00
     <div class="corps">
       <div class="colonnes schema-texte">
         <div>
-          <p class="petit">Les mêmes 8 bits se lisent de deux façons :</p>
+          <p class="petit">Les mêmes 8 bits se lisent de deux façons. En lecture <strong>non signée</strong>, le nombre est toujours positif : de 0 à 255. En lecture <strong>signée</strong>, il peut être négatif : de −128 à 127.</p>
           <table class="serre">
             <tr><th>Bits</th><th>Hexa</th><th>Lecture non signée</th><th>Lecture signée</th></tr>
             <tr><td><code>00000001</code></td><td><code>0x01</code></td><td>1</td><td>1</td></tr>
@@ -205,10 +205,10 @@ b8 07 00 00 00
             <tr class="car"><th>+ 1</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
           </table>
           <p class="petit">Chaque 0 devient 1 et chaque 1 devient 0, puis on ajoute 1 : <code>11111111</code> = <code>0xFF</code> = −1.</p>
-          <p class="petit muet">💡 Vérification : <code>11111111</code> + 1 = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits et disparaît : il reste 0, donc c'est bien −1.</p>
+          <p class="petit muet">💡 Vérification : <code>11111111</code> + 1 = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits : il reste 0, donc c'est bien −1.</p>
         </div>
       </div>
-      <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur ne le sait pas et calcule de la même façon dans les deux cas. C'est <strong>l'instruction choisie</strong> qui lit le résultat en signé ou en non signé. Vous le verrez avec les indicateurs CF et OF.</div>
+      <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur calcule pareil dans les deux cas. C'est <strong>l'instruction choisie</strong> qui lit le résultat en signé ou en non signé.</div>
     </div>
     <aside class="notes">
       Faire calculer −2 à la salle : 00000010, inversé 11111101, plus 1 : 11111110 = 0xFE. Cette notion sert au TP1 (−1 dans rbx, neg rax, 3 − 5 et les drapeaux) et aux sauts signés jl / non signés jb du cours 2.
