@@ -207,7 +207,7 @@ b8 07 00 00 00
           <p class="petit">Vérification : <code>11111111</code> + <code>00000001</code> = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits et disparaît : il reste 0, donc c'est bien −1.</p>
         </div>
       </div>
-      <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur ne le sait pas. C'est <strong>l'instruction choisie</strong> qui décide de l'interprétation, signée ou non signée.</div>
+      <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur ne le sait pas et calcule de la même façon dans les deux cas. C'est <strong>l'instruction choisie</strong> qui lit le résultat en signé ou en non signé. Vous le verrez avec les indicateurs CF et OF.</div>
     </div>
     <aside class="notes">
       Faire calculer −2 à la salle : 00000010, inversé 11111101, plus 1 : 11111110 = 0xFE. Cette notion sert au TP1 (−1 dans rbx, neg rax, 3 − 5 et les drapeaux) et aux sauts signés jl / non signés jb du cours 2.
@@ -231,12 +231,12 @@ b8 07 00 00 00
         </div>
         <div>
           <p><strong>Le petit-boutisme</strong> (<em>little-endian</em>)</p>
-          <p class="petit">Un nombre de plusieurs octets est rangé en mémoire <strong>octet de poids faible en premier</strong>. Le dword <code>0x11223344</code> donne :</p>
+          <p class="petit">Un nombre de plusieurs octets est rangé en mémoire <strong>en commençant par l'octet de poids faible</strong>, celui de droite. Le dword <code>0x11223344</code> donne :</p>
           <table class="indices">
             <tr><th>Adresse</th><td>+0</td><td>+1</td><td>+2</td><td>+3</td></tr>
             <tr class="car"><th>Octet</th><td>44</td><td>33</td><td>22</td><td>11</td></tr>
           </table>
-          <p class="petit">Revoyez <code>b8 07 00 00 00</code> : le 7 vient en premier.</p>
+          <p class="petit"><strong>Pourquoi c'est utile</strong> : GDB affiche la mémoire octet par octet, donc un nombre y apparaît à l'envers. <code>total dq 1000</code> (soit <code>0x3E8</code>) s'affiche <code>e8 03 00 00 00 00 00 00</code>.</p>
         </div>
       </div>
     </div>
