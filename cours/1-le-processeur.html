@@ -167,13 +167,14 @@ b8 07 00 00 00
         </div>
         <div>
           <ul class="dense">
-            <li><strong>Chiffres</strong> : le code d'un chiffre vaut ce chiffre + 48 (<code>0x30</code>). <code>'7'</code> = 7 + 48 = 55</li>
-            <li><strong>Lettres</strong> : rangées dans l'ordre. Une minuscule vaut sa majuscule + 32 : <code>'a'</code> − <code>'A'</code> = 97 − 65</li>
+            <li><strong>Chiffres</strong> : le chiffre n vaut <code>0x30</code>&nbsp;+&nbsp;n. En hexa, le chiffre se lit à droite : <code>'7'</code> = <code>0x37</code> = 55</li>
+            <li><strong>Lettres</strong> : la k-ième lettre de l'alphabet vaut <code>0x40</code>&nbsp;+&nbsp;k en majuscule et <code>0x60</code>&nbsp;+&nbsp;k en minuscule. <code>'H'</code>, 8<sup>e</sup> lettre, vaut <code>0x48</code></li>
+            <li>Une minuscule vaut donc sa majuscule + 32 (<code>0x20</code>) : <code>'a'</code> − <code>'A'</code> = 97 − 65</li>
           </ul>
           <p class="petit muet">💡 Table complète : <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange" target="_blank">ASCII sur Wikipédia</a>. Elle code 128 caractères, de 0 à 127.</p>
         </div>
       </div>
-      <div class="encadre marine" style="margin-top: 6px;">En mémoire, <code>"Hi"</code> n'est qu'une suite d'octets : <code>48 69</code>. Le processeur ne voit jamais de lettres, seulement des nombres.</div>
+      <div class="encadre marine" style="margin-top: 6px;">En mémoire, <code>"Hi"</code> n'est que deux octets : <code>48 69</code>. Le processeur ne voit que des nombres.</div>
     </div>
     <aside class="notes">
       Rappel de 2ARCH, utile au TP1 (afficher un nombre, passer en majuscule) et au TP3 (décoder les octets d'un mot de passe). Faire convertir 'H' en binaire à la salle : 72 = 64 + 8 = 01001000.
