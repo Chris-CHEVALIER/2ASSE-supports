@@ -489,7 +489,7 @@ $ echo $?
         <li>Même principe pour <code>rbx</code>, <code>rcx</code>, <code>rdx</code> (<code>ebx</code>, <code>bx</code>, <code>bl</code>…) et pour <code>r8</code> (<code>r8d</code>, <code>r8w</code>, <code>r8b</code>)</li>
         <li>Écrire dans <code>al</code> ou <code>ax</code> ne modifie <strong>que</strong> ces bits : le reste de <code>rax</code> est conservé</li>
       </ul>
-      <p class="petit muet">💡 Les lettres : <em>r</em> = <em>register</em> (64 bits), <em>e</em> = <em>extended</em> (32 bits), <em>x</em> = <code>ax</code> regroupe <code>ah</code> et <code>al</code>, <em>h</em> = <em>high</em> (octet de poids fort de <code>ax</code>), <em>l</em> = <em>low</em> (octet de poids faible). Pour <code>r8</code> : <em>d</em> = <em>dword</em>, <em>w</em> = <em>word</em>, <em>b</em> = <em>byte</em>.</p>
+      <p class="petit muet">💡 Les lettres : <em>a</em> = <em>accumulator</em>, le registre où « s'accumulent » les résultats des calculs ; <em>r</em> = <em>register</em> (64 bits), <em>e</em> = <em>extended</em> (32 bits), <em>x</em> = <code>ax</code> regroupe <code>ah</code> et <code>al</code>, <em>h</em> = <em>high</em> (octet de poids fort de <code>ax</code>), <em>l</em> = <em>low</em> (octet de poids faible). Pour <code>r8</code> : <em>d</em> = <em>dword</em>, <em>w</em> = <em>word</em>, <em>b</em> = <em>byte</em>.</p>
       <div class="encadre marine">Piège : écrire dans <code>eax</code> <strong>met à zéro</strong> les 32 bits de poids fort de <code>rax</code>.</div>
     </div>
   </section>
