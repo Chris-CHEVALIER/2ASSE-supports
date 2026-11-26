@@ -260,7 +260,7 @@ $ objdump -s -j .data hello
 Contents of section .data:
  402000 48656c6c 6f20576f 726c6421 0a        Hello World!.
 </code></pre>
-      <p class="petit muet">💡 <code>objdump -s -j .data</code> affiche le contenu de la section des données : l'adresse, les octets en hexa par groupes de 4, puis leur lecture en ASCII.</p>
+      <p class="petit muet">💡 <code>objdump -s -j .data</code> affiche le contenu de la section des données. Chaque ligne commence par l'<strong>adresse mémoire</strong> de son premier octet (<code>402000</code>, en hexa), choisie par <code>ld</code> : ce n'est pas une donnée. Suivent les octets en hexa par groupes de 4, puis leur lecture en ASCII.</p>
       <ul class="dense">
         <li><code>48 65 6c 6c 6f</code> : <code>"Hello"</code>, un octet par caractère. <code>20</code> est l'espace</li>
         <li><code>0a</code> : le saut de ligne (10), le <code>, 10</code> de la ligne <code>msg db</code></li>
