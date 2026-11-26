@@ -150,11 +150,10 @@
           syscall
     </code></pre>
 
-    <p>Assemblez-le, exécutez-le et affichez son code de retour :</p>
+    <p>Assemblez-le, puis exécutez-le :</p>
     <pre data-titre="Terminal"><code class="language-plaintext">
       make hello
       ./hello
-      echo $?
     </code></pre>
     <p class="muet" style="font-size: 14px;"><code>make hello</code> lance <code>nasm -f elf64 -g -F dwarf hello.asm -o hello.o</code> puis <code>ld hello.o -o hello</code>. Ouvrez le <code>Makefile</code> pour le constater.</p>
 
@@ -164,6 +163,7 @@
       <li>utilise <strong>un appel <code>write</code> par ligne</strong>, avec deux messages et deux longueurs dans la section <code>.data</code> ;</li>
       <li>se termine avec le code de retour <strong>42</strong>.</li>
     </ol>
+    <p>Pour vérifier le code de retour, tapez <code>echo $?</code> juste après <code>./hello</code> : cette commande affiche le code de retour du dernier programme lancé.</p>
 
     <h3>Questions</h3>
     <p><strong>Q1.</strong> Faites une copie de votre programme, puis supprimez-y les trois lignes de l'appel <code>exit</code>. Assemblez et exécutez cette copie. Que se passe-t-il ? Pourquoi ?</p>

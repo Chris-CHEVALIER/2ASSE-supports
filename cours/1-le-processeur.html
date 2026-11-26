@@ -390,14 +390,11 @@ $ nasm -f elf64 -g -F dwarf hello.asm -o hello.o
 $ ld hello.o -o hello
 $ ./hello
 Hello World!
-$ echo $?
-0
 </code></pre>
       <table class="serre">
         <tr><th>Commande</th><th>Rôle</th></tr>
         <tr><td><code>nasm -f elf64</code></td><td>assemble pour Linux 64 bits ; <code>-g -F dwarf</code> ajoute les informations utiles au débogueur</td></tr>
         <tr><td><code>ld … -o hello</code></td><td>lie le fichier objet et produit l'exécutable <code>hello</code></td></tr>
-        <tr><td><code>echo $?</code></td><td>affiche le <strong>code de retour</strong> du dernier programme (la valeur donnée à <code>exit</code>)</td></tr>
       </table>
       <p class="petit muet">Dans le modèle de dépôt, <code>make hello</code> lance les deux premières commandes pour vous.</p>
     </div>
@@ -479,7 +476,7 @@ $ ./compute
 $ echo $?
 30
 </code></pre>
-          <p>Afficher un nombre demande de le convertir en caractères. En attendant, le <strong>code de retour</strong> sert de sortie.</p>
+          <p>Afficher un nombre demande de le convertir en caractères. En attendant, le <strong>code de retour</strong> (la valeur donnée à <code>exit</code>) sert de sortie : <code>echo $?</code> l'affiche pour le dernier programme lancé.</p>
           <p class="petit muet">Le code de retour tient sur un octet : il est lu modulo 256.</p>
         </div>
       </div>
