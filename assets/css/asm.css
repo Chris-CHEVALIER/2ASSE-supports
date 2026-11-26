@@ -53,3 +53,8 @@
 .reveal figure.illustration { margin: 0; text-align: center; }
 .reveal figure.illustration img { max-width: 100%; border: 1px solid var(--gris-clair); border-radius: 6px; }
 .reveal figure.illustration figcaption { font-size: 15px; color: #5B6E8F; margin-top: 4px; }
+
+/* Registres à retenir en priorité */
+.reveal table tr td.cle { background: var(--ambre-clair); }
+.reveal tr.groupe th { background: var(--gris-clair); color: var(--marine); font-size: .9em; }
+.reveal tr.groupe th.cle { background: var(--ambre); }

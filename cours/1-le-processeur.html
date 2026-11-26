@@ -377,20 +377,25 @@ $ echo $?
     <div class="corps">
       <div class="colonnes">
         <div>
-          <p><strong>Le bug de l'an 2038</strong> (lecture signée)</p>
+          <p><a href="https://fr.wikipedia.org/wiki/Bug_de_l%27an_2038" target="_blank"><strong>Le bug de l'an 2038</strong></a> (lecture signée)</p>
           <figure class="illustration">
             <img src="../assets/img/an-2038.png" alt="Compteur binaire de 32 bits : le bit de gauche passe à 1 et la date saute de 2038 à 1901" style="width: 260px;">
-            <figcaption>D'après une animation de Monaneko, domaine public (<a href="https://commons.wikimedia.org/wiki/File:Year_2038_problem.gif" target="_blank">Wikimedia Commons</a>)</figcaption>
+            <figcaption>D'après Monaneko, domaine public (<a href="https://commons.wikimedia.org/wiki/File:Year_2038_problem.gif" target="_blank">Commons</a>)</figcaption>
           </figure>
           <p class="petit">Linux compte les secondes depuis le 1<sup>er</sup> janvier 1970 dans un entier <strong>signé de 32 bits</strong>. Le 19 janvier 2038, le bit de gauche passe à 1 : le nombre devient négatif et la date revient en 1901.</p>
         </div>
         <div>
-          <p><strong>Le niveau 256 de Pac-Man</strong> (un octet)</p>
-          <p class="petit">Le jeu d'arcade (1980) range le numéro de niveau dans <strong>un octet</strong>, qui va de 0 à 255. Au niveau 256, le calcul qui dessine les fruits en bas de l'écran déborde : la moitié droite de l'écran se remplit de symboles et le niveau ne peut pas être terminé.</p>
-          <p class="petit muet">💡 Images et explication : <a href="https://fr.wikipedia.org/wiki/Pac-Man#Bug_au_256e_niveau" target="_blank">le bug du 256<sup>e</sup> niveau sur Wikipédia</a>. Et pour 2038 : <a href="https://fr.wikipedia.org/wiki/Bug_de_l%27an_2038" target="_blank">le bug de l'an 2038</a>.</p>
+          <p><a href="https://fr.wikipedia.org/wiki/Pac-Man#Bug_au_256e_niveau" target="_blank"><strong>Le niveau 256 de Pac-Man</strong></a> (un octet)</p>
+          <div style="display: flex; gap: 14px; align-items: flex-start;">
+            <figure class="illustration" style="flex: 0 0 auto;">
+              <img src="../assets/img/pacman-256.png" alt="Niveau 256 de Pac-Man : la moitié droite de l'écran est couverte de lettres et de symboles" style="height: 160px; image-rendering: pixelated;">
+              <figcaption>Pac-Man © Namco (<a href="https://pacman.fandom.com/wiki/File:Pacman_round256.png" target="_blank">Pac-Man Wiki</a>)</figcaption>
+            </figure>
+            <p class="petit">Le jeu d'arcade (1980) range le numéro de niveau dans <strong>un octet</strong> (0 à 255). Au niveau 256, le calcul qui dessine les fruits déborde : la moitié droite de l'écran se remplit de symboles et le niveau ne peut pas être terminé.</p>
+          </div>
         </div>
       </div>
-      <div class="encadre usage">Choisir la taille et la lecture d'une donnée n'est pas un détail. Pour 2038, Linux range désormais les dates sur 64 bits.</div>
+      <div class="encadre usage">La taille et la lecture d'une donnée ne sont pas un détail : Linux range désormais les dates sur 64 bits.</div>
     </div>
     <aside class="notes">
       Faire calculer : 2 147 483 647 = 0x7FFFFFFF, le plus grand entier signé de 32 bits. Pour Pac-Man : 255 + 1 sur un octet donne 0 (la retenue est perdue), comme la vérification du complément à deux.
@@ -430,14 +435,16 @@ $ echo $?
     <h2>16 registres généraux de 64 bits</h2>
     <div class="corps">
       <table class="serre">
-        <tr><th>Registre</th><th>Nom complet</th><th>Usage habituel</th><th>Registre</th><th>Nom complet</th><th>Usage habituel</th></tr>
-        <tr><td><code>rax</code></td><td><em>accumulator</em></td><td>résultat d'un calcul, n° d'appel système</td><td><code>rsi</code></td><td><em>source index</em></td><td>source, 2<sup>e</sup> argument</td></tr>
-        <tr><td><code>rbx</code></td><td><em>base</em></td><td>usage libre</td><td><code>rdi</code></td><td><em>destination index</em></td><td>destination, 1<sup>er</sup> argument</td></tr>
-        <tr><td><code>rcx</code></td><td><em>counter</em></td><td>compteur de boucle</td><td><code>rbp</code></td><td><em>base pointer</em></td><td>base de la pile d'une fonction</td></tr>
-        <tr><td><code>rdx</code></td><td><em>data</em></td><td>données, 3<sup>e</sup> argument</td><td><code>rsp</code></td><td><em>stack pointer</em></td><td><strong>sommet de la pile</strong> : ne pas y toucher</td></tr>
-        <tr><td colspan="6"><code>r8</code> à <code>r15</code> : huit registres supplémentaires, simplement numérotés, ajoutés avec le passage au 64 bits</td></tr>
+        <tr class="groupe"><th colspan="3" class="cle">★ À retenir dès aujourd'hui : ceux de <code>hello.asm</code></th><th colspan="3">Les autres</th></tr>
+        <tr><th>Registre</th><th>Nom complet</th><th>Usage</th><th>Registre</th><th>Nom complet</th><th>Usage</th></tr>
+        <tr><td class="cle"><code>rax</code></td><td class="cle"><em>accumulator</em></td><td class="cle">n° d'appel système, résultat</td><td><code>rbx</code></td><td><em>base</em></td><td>libre, pour vos calculs</td></tr>
+        <tr><td class="cle"><code>rdi</code></td><td class="cle"><em style="white-space: nowrap">destination index</em></td><td class="cle">1<sup>er</sup> argument</td><td><code>rcx</code></td><td><em>counter</em></td><td>compteur de boucle</td></tr>
+        <tr><td class="cle"><code>rsi</code></td><td class="cle"><em style="white-space: nowrap">source index</em></td><td class="cle">2<sup>e</sup> argument</td><td><code>rsp</code></td><td><em style="white-space: nowrap">stack pointer</em></td><td><strong>sommet de la pile</strong>, à ne pas toucher</td></tr>
+        <tr><td class="cle"><code>rdx</code></td><td class="cle"><em>data</em></td><td class="cle">3<sup>e</sup> argument</td><td><code>rbp</code></td><td><em style="white-space: nowrap">base pointer</em></td><td>base de la pile</td></tr>
+        <tr><td colspan="6"><code>r8</code> à <code>r15</code> : huit registres de plus, simplement numérotés. Seul <code>r8</code> servira, au TP2.</td></tr>
       </table>
-      <p class="petit muet">💡 Un <strong>registre</strong> est une petite case de mémoire à l'intérieur du processeur, la plus rapide. Le <em>r</em> de <code>rax</code>, <code>rip</code>… vient de <em>register</em> : il marque la version 64 bits d'un registre plus ancien (<code>ax</code> sur 16 bits, <code>eax</code> sur 32 bits).</p>
+      <p class="petit muet">💡 Un <strong>registre</strong> est une petite case de mémoire à l'intérieur du processeur, la plus rapide. Le <em>r</em> de <code>rax</code>, <code>rip</code>… vient de <em>register</em>.</p>
+      <div class="encadre usage" style="margin-top: 10px;">Quel registre choisir ? Un appel système impose les quatre à retenir. Pour vos calculs, prenez un registre libre (<code>rbx</code>, <code>rcx</code>…), mais jamais <code>rsp</code>.</div>
     </div>
     <aside class="notes">
       Les noms viennent du 8086 de 1978. Traductions : accumulateur, base, compteur, données, index source, index destination, pointeur de base, pointeur de pile (stack = pile). Le x de rax vient de « extended » (ax regroupait ah et al). Le r ajouté en 64 bits signifie register.
@@ -481,6 +488,7 @@ $ echo $?
         <li>Même principe pour <code>rbx</code>, <code>rcx</code>, <code>rdx</code> (<code>ebx</code>, <code>bx</code>, <code>bl</code>…) et pour <code>r8</code> (<code>r8d</code>, <code>r8w</code>, <code>r8b</code>)</li>
         <li>Écrire dans <code>al</code> ou <code>ax</code> ne modifie <strong>que</strong> ces bits : le reste de <code>rax</code> est conservé</li>
       </ul>
+      <p class="petit muet">💡 Les lettres : <em>r</em> = <em>register</em> (64 bits), <em>e</em> = <em>extended</em> (32 bits), <em>x</em> = <code>ax</code> regroupe <code>ah</code> et <code>al</code>, <em>h</em> = <em>high</em> (octet de poids fort de <code>ax</code>), <em>l</em> = <em>low</em> (octet de poids faible). Pour <code>r8</code> : <em>d</em> = <em>dword</em>, <em>w</em> = <em>word</em>, <em>b</em> = <em>byte</em>.</p>
       <div class="encadre marine">Piège : écrire dans <code>eax</code> <strong>met à zéro</strong> les 32 bits de poids fort de <code>rax</code>.</div>
     </div>
   </section>
@@ -488,6 +496,7 @@ $ echo $?
   <section>
     <h2>Les indicateurs (<em>flags</em>)</h2>
     <div class="corps">
+      <p class="petit">Après chaque calcul (<code>add</code>, <code>sub</code>…), l'ALU (<em>Arithmetic Logic Unit</em>, l'unité de calcul) note <strong>automatiquement</strong> quelques informations sur le résultat : les <strong>indicateurs</strong>, des bits du registre <code>rflags</code>. Le code ne les écrit jamais : les calculs les mettent à jour, d'autres instructions les lisent.</p>
       <div class="colonnes">
         <div>
           <table class="serre">
@@ -505,13 +514,54 @@ add al, 1     ; al = 0, ZF = 1, CF = 1
 mov al, 127
 add al, 1     ; al = -128, SF = 1, OF = 1
 </code></pre>
-          <p class="petit">Vous connaissiez Z et N depuis votre ALU (<em>Arithmetic Logic Unit</em>, l'unité de calcul) de 2ARCH : <strong>CF</strong> et <strong>OF</strong> complètent le tableau. Ces bits sont rangés dans le registre <code>rflags</code>. Les indicateurs servent à <strong>prendre des décisions</strong> : « si le résultat est nul, sauter ailleurs ». C'est ainsi que s'écrivent les conditions et les boucles.</p>
+          <p class="petit muet">💡 Vous connaissiez Z et N avec votre ALU de 2ARCH : ce sont ZF et SF.</p>
         </div>
       </div>
+      <div class="encadre usage">Sans indicateurs, pas de « si » ni de boucle : chaque décision d'un programme est un saut qui lit un indicateur.</div>
     </div>
     <aside class="notes">
-      255 + 1 sur 8 bits : en non signé on déborde (CF), en signé c'est −1 + 1 = 0, tout va bien (OF = 0).
+      Exemples à donner à l'oral : 255 + 1 sur 8 bits (al) donne 0, ZF = 1 et CF = 1 ; en signé c'est −1 + 1 = 0, tout va bien (OF = 0).
       127 + 1 : en non signé 128, tout va bien (CF = 0) ; en signé on passe de 127 à −128 (OF).
+    </aside>
+  </section>
+
+  <section>
+    <h2>Une première condition</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <div>
+        <pre class="micro" data-titre="pin.asm" data-code="0"><code class="language-x86asm" data-trim>
+; pin.asm : renvoie 0 si le code vaut 1234, sinon 1
+section .text
+    global _start
+_start:
+    mov rax, 1234       ; le code saisi
+    mov rdi, 1          ; par défaut : refusé (1)
+    cmp rax, 1234       ; compare : ZF = 1 si égaux
+    jne end             ; si différent (ZF = 0), sauter à end
+    mov rdi, 0          ; sinon : accepté (0)
+end:
+    mov rax, 60         ; exit, code de retour rdi
+    syscall
+</code></pre>
+          <pre class="terminal mini" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
+$ ./pin ; echo $?
+0
+</code></pre>
+        </div>
+        <div>
+          <p class="petit"><strong>En pseudo-code</strong> : si le code vaut 1234, renvoyer 0 (accepté), sinon renvoyer 1 (refusé).</p>
+          <ul class="dense">
+            <li><code>cmp</code> (<em>compare</em>) calcule <code>rax − 1234</code> sans garder le résultat : il ne sert qu'à mettre à jour les indicateurs</li>
+            <li><code>jne</code> (<em>jump if not equal</em>) lit ZF : il saute si les deux valeurs sont différentes</li>
+          </ul>
+          <p class="petit muet">💡 Avec <code>mov rax, 1111</code>, <code>echo $?</code> affiche 1.</p>
+        </div>
+      </div>
+      <div class="encadre usage"><code>coffre</code> fait exactement cela : une comparaison, puis un saut.</div>
+    </div>
+    <aside class="notes">
+      Démo en direct : assembler, lancer, puis remplacer 1234 par 1111. Dans GDB, info registers eflags montre ZF juste après cmp (le TP1 le fait faire).
     </aside>
   </section>
 
@@ -525,10 +575,11 @@ add al, 1     ; al = -128, SF = 1, OF = 1
   </section>
 
   <section>
-    <h2>Hello World!</h2>
+    <h2>Hello World! (1/2) : les données</h2>
     <div class="corps">
       <div class="colonnes code-texte">
-        <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
+        <div>
+        <pre class="micro" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
 ; hello.asm : affiche un message puis quitte
 section .data
     msg db "Hello World!", 10   ; texte ASCII + saut de ligne
@@ -547,14 +598,14 @@ _start:
     mov rdi, 0      ; code de retour 0
     syscall
 </code></pre>
+          <p class="petit muet">💡 <code>;</code> commence un commentaire. <code>$</code> n'est pas <code>rip</code> : NASM le calcule une fois pour toutes en assemblant, alors que <code>rip</code> n'existe qu'à l'exécution.</p>
+        </div>
         <div class="dense">
-          <ul>
-            <li><code>section .data</code> : les <strong>données</strong> du programme</li>
-            <li><code>section .text</code> : le <strong>code</strong></li>
-            <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, c'est-à-dire des noms donnés à une adresse</li>
-            <li><code>_start</code> : la première instruction exécutée</li>
-            <li><code>equ $ - msg</code> : <code>$</code> est l'adresse courante, donc la longueur vaut « ici moins le début du message »</li>
-            <li><code>;</code> commence un commentaire</li>
+          <ul style="font-size: .85em;">
+            <li><code>section .data</code> : les <strong>données</strong> ; <code>section .text</code> : le <strong>code</strong></li>
+            <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, c'est-à-dire des noms donnés à une adresse. <code>msg</code> joue le rôle d'une <strong>variable</strong> (là où sont rangées les données), <code>_start</code> celui du <code>main</code> d'un programme C (la première instruction exécutée)</li>
+            <li><code>db</code> (<em>define byte</em>) range des octets : les 12 caractères du message, puis 10, le saut de ligne</li>
+            <li><code>len equ $ - msg</code> : <code>equ</code> (<em>equate</em>) donne un nom à une constante. <code>$</code> est l'adresse où NASM écrit à cet endroit, juste après le message : <code>0x40200d</code>. <code>len</code> = <code>0x40200d</code> − <code>0x402000</code> = 13 octets</li>
           </ul>
         </div>
       </div>
@@ -565,47 +616,63 @@ _start:
   </section>
 
   <section>
+    <h2>Hello World! (2/2) : les instructions, ligne par ligne</h2>
+    <div class="corps">
+      <table class="serre" style="font-size: .8em;">
+        <tr><th>Ligne</th><th>Ce qu'elle fait</th></tr>
+        <tr><td style="white-space: nowrap"><code>global _start</code></td><td>rend l'étiquette <code>_start</code> visible de <code>ld</code>, qui sait ainsi où le programme commence</td></tr>
+        <tr><td style="white-space: nowrap"><code>_start:</code></td><td>l'étiquette de la première instruction exécutée</td></tr>
+        <tr><td style="white-space: nowrap"><code>mov rax, 1</code></td><td>copie 1 dans <code>rax</code> (<code>mov</code> : destination à gauche). 1 est le numéro de l'appel système <strong>write</strong> (écrire)</td></tr>
+        <tr><td style="white-space: nowrap"><code>mov rdi, 1</code></td><td>1<sup>er</sup> argument de write : où écrire. 1 = la sortie standard, l'écran</td></tr>
+        <tr><td style="white-space: nowrap"><code>mov rsi, msg</code></td><td>2<sup>e</sup> argument : l'adresse du message (<code>0x402000</code>)</td></tr>
+        <tr><td style="white-space: nowrap"><code>mov rdx, len</code></td><td>3<sup>e</sup> argument : le nombre d'octets à écrire (13)</td></tr>
+        <tr><td style="white-space: nowrap"><code>syscall</code></td><td>demande au <strong>noyau</strong> (le cœur de Linux, seul autorisé à écrire à l'écran) d'exécuter l'appel : <code>Hello World!</code> s'affiche</td></tr>
+        <tr><td style="white-space: nowrap"><code>mov rax, 60</code></td><td>le numéro de l'appel système <strong>exit</strong> (quitter)</td></tr>
+        <tr><td style="white-space: nowrap"><code>mov rdi, 0</code></td><td>copie 0 dans <code>rdi</code> : le code de retour à transmettre. Rien n'est encore renvoyé</td></tr>
+        <tr><td style="white-space: nowrap"><code>syscall</code></td><td>le noyau lit <code>rdi</code>, arrête le programme et transmet ce 0 (« tout s'est bien passé »)</td></tr>
+      </table>
+    </div>
+    <aside class="notes">
+      Les quatre registres à retenir sont tous là : rax choisit l'appel, rdi, rsi et rdx portent ses arguments. Lire le programme ligne par ligne avec la salle, en montrant chaque ligne dans le code de la diapo précédente. Sans le second appel (exit), le processeur continuerait d'exécuter les octets suivants et planterait.
+    </aside>
+  </section>
+
+  <section>
     <h2>Assembler, lier, exécuter</h2>
     <div class="corps">
-      <pre class="terminal" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
+      <pre class="terminal mini" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
 $ nasm -f elf64 -g -F dwarf hello.asm -o hello.o
 $ ld hello.o -o hello
 $ ./hello
 Hello World!
 </code></pre>
-      <table class="serre">
-        <tr><th>Commande</th><th>Rôle</th></tr>
-        <tr><td><code>nasm -f elf64</code></td><td>assemble pour Linux 64 bits ; <code>-g -F dwarf</code> ajoute les informations utiles au débogueur</td></tr>
-        <tr><td><code>ld … -o hello</code></td><td>lie le fichier objet et produit l'exécutable <code>hello</code></td></tr>
+      <table class="serre" style="font-size: .85em;">
+        <tr><th>Morceau</th><th>Rôle</th></tr>
+        <tr><td style="white-space: nowrap"><code>nasm</code></td><td>l'assembleur : traduit <code>hello.asm</code> en octets</td></tr>
+        <tr><td style="white-space: nowrap"><code>-f elf64</code></td><td>format <strong>ELF</strong> (<em>Executable and Linkable Format</em>) des programmes Linux, en 64 bits</td></tr>
+        <tr><td style="white-space: nowrap"><code>-g -F dwarf</code></td><td>informations de débogage au format <strong>DWARF</strong>, lu par GDB</td></tr>
+        <tr><td style="white-space: nowrap"><code>-o hello.o</code></td><td>le nom du fichier produit (<em>o</em> pour <em>output</em>, sortie)</td></tr>
+        <tr><td style="white-space: nowrap"><code>ld hello.o -o hello</code></td><td><code>ld</code> (de <em>loader</em>), l'éditeur de liens : produit l'exécutable</td></tr>
       </table>
-      <p class="petit muet">Dans le modèle de dépôt, <code>make hello</code> lance les deux premières commandes pour vous.</p>
+      <p class="petit muet">💡 <code>./hello</code> lance le programme du dossier courant ; <code>make hello</code> fait les deux premières étapes.</p>
     </div>
+    <aside class="notes">
+      Anecdote : elf veut dire « elfe » en anglais ; par jeu de mots, le format de débogage a été baptisé dwarf, « nain ».
+    </aside>
   </section>
 
   <section>
     <h2>Les appels système</h2>
     <div class="corps">
-      <div class="colonnes">
-        <div>
-          <p>Un programme ne peut pas parler seul à l'écran ou au disque. Il <strong>demande ce service au noyau</strong> du système d'exploitation par un <strong>appel système</strong>.</p>
-          <ol class="dense">
-            <li>Mettre le <strong>numéro</strong> de l'appel dans <code>rax</code></li>
-            <li>Mettre les <strong>arguments</strong> dans <code>rdi</code>, <code>rsi</code>, <code>rdx</code> (puis <code>r10</code>, <code>r8</code>, <code>r9</code>)</li>
-            <li>Exécuter l'instruction <code>syscall</code></li>
-            <li>Lire le <strong>résultat</strong> dans <code>rax</code></li>
-          </ol>
-        </div>
-        <div>
-          <table class="serre">
-            <tr><th><code>rax</code></th><th>Appel</th><th>Arguments</th></tr>
-            <tr><td>0</td><td><code>read</code></td><td><code>rdi</code> = descripteur, <code>rsi</code> = adresse, <code>rdx</code> = taille max</td></tr>
-            <tr><td>1</td><td><code>write</code></td><td><code>rdi</code> = descripteur, <code>rsi</code> = adresse, <code>rdx</code> = longueur</td></tr>
-            <tr><td>60</td><td><code>exit</code></td><td><code>rdi</code> = code de retour</td></tr>
-          </table>
-          <p class="petit">Descripteurs : 0 = entrée standard (clavier), 1 = sortie standard (écran), 2 = sortie d'erreur.</p>
-          <p class="petit muet">Liste complète : <a href="https://filippo.io/linux-syscall-table/" target="_blank">table des appels système Linux x86-64</a>.</p>
-        </div>
-      </div>
+      <p class="petit">Un programme ne peut pas parler seul à l'écran ou au clavier. Il <strong>demande ce service au noyau</strong> par un <strong>appel système</strong> : le numéro de l'appel dans <code>rax</code>, ses arguments dans <code>rdi</code>, <code>rsi</code> et <code>rdx</code>, puis l'instruction <code>syscall</code>. Le résultat revient dans <code>rax</code>.</p>
+      <table class="serre">
+        <tr><th>Appel (n° dans <code>rax</code>)</th><th>Ce qu'il fait</th><th><code>rdi</code></th><th><code>rsi</code></th><th><code>rdx</code></th></tr>
+        <tr><td><strong>write</strong> (1)</td><td>affiche des octets</td><td>où écrire : 1 = l'écran</td><td>l'adresse du texte</td><td>le nombre d'octets</td></tr>
+        <tr><td><strong>read</strong> (0)</td><td>lit ce qu'on tape</td><td>d'où lire : 0 = le clavier</td><td>l'adresse où ranger le texte</td><td>le nombre d'octets au plus</td></tr>
+        <tr><td><strong>exit</strong> (60)</td><td>quitte le programme</td><td>le code de retour</td><td>–</td><td>–</td></tr>
+      </table>
+      <p class="petit muet">💡 Les numéros 0 (clavier), 1 (écran) et 2 (messages d'erreur) s'appellent des <strong>descripteurs</strong>. Liste complète : <a href="https://filippo.io/linux-syscall-table/" target="_blank">table des appels système Linux x86-64</a>.</p>
+      <div class="encadre usage">Dans <code>hello.asm</code> : <code>rax</code> = 1 (write), <code>rdi</code> = 1 (l'écran), <code>rsi</code> = <code>msg</code> (le texte), <code>rdx</code> = <code>len</code> (13 octets), puis <code>syscall</code>.</div>
     </div>
     <aside class="notes">
       Sans exit, le processeur continue d'exécuter les octets qui suivent le programme et plante (Segmentation fault). Le montrer en direct en commentant les trois dernières lignes.
