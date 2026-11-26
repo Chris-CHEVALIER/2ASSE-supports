@@ -76,24 +76,24 @@ Coffre ouvert.
     <h2>Notre fil rouge : <code>hello.asm</code></h2>
     <div class="corps">
       <div class="colonnes code-texte">
-        <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
-; hello.asm : affiche un message puis quitte
+        <pre class="mini" style="font-size: 13.8px;" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
+; hello.asm : affiche "Hello World!" puis quitte
 section .data
-    msg db "Hello World!", 10   ; texte ASCII + saut de ligne
-    len equ $ - msg             ; longueur du message
+    msg db "Hello World!", 10 ; texte ASCII + saut de ligne (10)
+    len equ $ - msg ; longueur : adresse fin - adresse début
 
 section .text
     global _start
 _start:
-    mov rax, 1      ; write : afficher
-    mov rdi, 1      ; sur l'écran
-    mov rsi, msg    ; le message
-    mov rdx, len    ; de len octets
-    syscall
+    mov rax, 1      ; appel système write
+    mov rdi, 1      ; 1er argument : afficher sur l'écran
+    mov rsi, msg    ; 2e argument : l'adresse du message
+    mov rdx, len    ; 3e argument : sur len octets
+    syscall         ; le noyau exécute write
 
-    mov rax, 60     ; exit : quitter
-    mov rdi, 0      ; code de retour 0
-    syscall
+    mov rax, 60     ; appel système exit
+    mov rdi, 0      ; 1er argument : code de retour 0
+    syscall         ; exit lit le code de retour dans rdi
 </code></pre>
         <div>
           <pre class="terminal mini" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
@@ -581,23 +581,23 @@ $ ./pin ; echo $?
       <div class="colonnes code-texte">
         <div>
         <pre class="micro" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
-; hello.asm : affiche un message puis quitte
+; hello.asm : affiche "Hello World!" puis quitte
 section .data
-    msg db "Hello World!", 10   ; texte ASCII + saut de ligne
-    len equ $ - msg             ; longueur du message
+    msg db "Hello World!", 10 ; texte ASCII + saut de ligne (10)
+    len equ $ - msg ; longueur : adresse fin - adresse début
 
 section .text
     global _start
 _start:
-    mov rax, 1      ; write : afficher
-    mov rdi, 1      ; sur l'écran
-    mov rsi, msg    ; le message
-    mov rdx, len    ; de len octets
-    syscall
+    mov rax, 1      ; appel système write
+    mov rdi, 1      ; 1er argument : afficher sur l'écran
+    mov rsi, msg    ; 2e argument : l'adresse du message
+    mov rdx, len    ; 3e argument : sur len octets
+    syscall         ; le noyau exécute write
 
-    mov rax, 60     ; exit : quitter
-    mov rdi, 0      ; code de retour 0
-    syscall
+    mov rax, 60     ; appel système exit
+    mov rdi, 0      ; 1er argument : code de retour 0
+    syscall         ; exit lit le code de retour dans rdi
 </code></pre>
           <p class="petit muet">💡 <code>;</code> commence un commentaire. <code>$</code> n'est pas <code>rip</code> : NASM le calcule une fois pour toutes en assemblant, alors que <code>rip</code> n'existe qu'à l'exécution.</p>
         </div>
@@ -651,8 +651,8 @@ Hello World!
         <tr><th>Morceau</th><th>Rôle</th></tr>
         <tr><td style="white-space: nowrap"><code>nasm</code></td><td>l'assembleur : traduit <code>hello.asm</code> en octets</td></tr>
         <tr><td style="white-space: nowrap"><code>-f elf64</code></td><td>format <strong>ELF</strong> (<em>Executable and Linkable Format</em>) des programmes Linux, en 64 bits</td></tr>
-        <tr><td style="white-space: nowrap"><code>-g -F dwarf</code></td><td>informations de débogage au format <strong>DWARF</strong>, lu par GDB</td></tr>
-        <tr><td style="white-space: nowrap"><code>-o hello.o</code></td><td>le nom du fichier produit (<em>o</em> pour <em>output</em>, sortie)</td></tr>
+        <tr><td style="white-space: nowrap"><code>-g -F dwarf</code></td><td>débogage au format <strong>DWARF</strong> : quelle ligne a produit quels octets, pour que GDB montre le source</td></tr>
+        <tr><td style="white-space: nowrap"><code>-o hello.o</code></td><td>le fichier produit (<code>-o</code> : <em>output</em> ; l'extension <code>.o</code> : objet)</td></tr>
         <tr><td style="white-space: nowrap"><code>ld hello.o -o hello</code></td><td><code>ld</code> (de <em>loader</em>), l'éditeur de liens : produit l'exécutable</td></tr>
       </table>
       <p class="petit muet">💡 <code>./hello</code> lance le programme du dossier courant ; <code>make hello</code> fait les deux premières étapes.</p>

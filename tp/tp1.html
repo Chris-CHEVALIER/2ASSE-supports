@@ -130,24 +130,23 @@
 
     <p>Dans le terminal, placez-vous dans le dossier du TP avec <code>cd tp1</code>. Créez le fichier <code>hello.asm</code> avec la commande <code>code hello.asm</code>, qui l'ouvre dans l'éditeur, et recopiez le programme du cours :</p>
     <pre data-titre="tp1/hello.asm"><code class="language-x86asm">
-      ; hello.asm : affiche un message puis quitte
+      ; hello.asm : affiche "Hello World!" puis quitte
       section .data
-          msg db "Hello World!", 10       ; 10 = saut de ligne
-          len equ $ - msg                 ; longueur du message
+          msg db "Hello World!", 10 ; texte ASCII + saut de ligne (10)
+          len equ $ - msg ; longueur : adresse fin - adresse début
 
       section .text
-          global _start                   ; point d'entrée
-
+          global _start
       _start:
-          mov rax, 1          ; appel système n° 1 : write
-          mov rdi, 1          ; descripteur 1 : la sortie standard
-          mov rsi, msg        ; adresse du message
-          mov rdx, len        ; nombre d'octets à écrire
-          syscall             ; le noyau affiche le message
+          mov rax, 1      ; appel système write
+          mov rdi, 1      ; 1er argument : afficher sur l'écran
+          mov rsi, msg    ; 2e argument : l'adresse du message
+          mov rdx, len    ; 3e argument : sur len octets
+          syscall         ; le noyau exécute write
 
-          mov rax, 60         ; appel système n° 60 : exit
-          mov rdi, 0          ; code de retour 0 : tout va bien
-          syscall
+          mov rax, 60     ; appel système exit
+          mov rdi, 0      ; 1er argument : code de retour 0
+          syscall         ; exit lit le code de retour dans rdi
     </code></pre>
 
     <p>Assemblez-le, puis exécutez-le :</p>
