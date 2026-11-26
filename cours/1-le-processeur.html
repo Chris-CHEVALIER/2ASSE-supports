@@ -599,7 +599,7 @@ _start:
     mov rdi, 0      ; 1er argument : code de retour 0
     syscall         ; exit lit le code de retour dans rdi
 </code></pre>
-          <p class="petit muet">💡 <code>;</code> commence un commentaire. <code>$</code> n'est pas <code>rip</code> : NASM le calcule une fois pour toutes en assemblant, alors que <code>rip</code> n'existe qu'à l'exécution.</p>
+          <p class="petit muet">💡 <code>;</code> commence un commentaire. <code>$</code> n'est pas <code>rip</code> : NASM le calcule en assemblant. Les noms <code>.text</code> et <code>.data</code> sont imposés : ils fixent les droits (code exécutable, données modifiables).</p>
         </div>
         <div class="dense">
           <ul style="font-size: .85em;">
