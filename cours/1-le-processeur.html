@@ -438,7 +438,6 @@ $ echo $?
         <tr><td colspan="6"><code>r8</code> à <code>r15</code> : huit registres supplémentaires, simplement numérotés, ajoutés avec le passage au 64 bits</td></tr>
       </table>
       <p class="petit muet">💡 Un <strong>registre</strong> est une petite case de mémoire à l'intérieur du processeur, la plus rapide. Le <em>r</em> de <code>rax</code>, <code>rip</code>… vient de <em>register</em> : il marque la version 64 bits d'un registre plus ancien (<code>ax</code> sur 16 bits, <code>eax</code> sur 32 bits).</p>
-      <div class="encadre" style="margin-top: 10px;"><code>rflags</code> : les <strong>indicateurs</strong>, mis à jour par l'<strong>ALU</strong> (<em>Arithmetic Logic Unit</em>, l'unité de calcul) après chaque calcul.</div>
     </div>
     <aside class="notes">
       Les noms viennent du 8086 de 1978. Traductions : accumulateur, base, compteur, données, index source, index destination, pointeur de base, pointeur de pile (stack = pile). Le x de rax vient de « extended » (ax regroupait ah et al). Le r ajouté en 64 bits signifie register.
@@ -506,7 +505,7 @@ add al, 1     ; al = 0, ZF = 1, CF = 1
 mov al, 127
 add al, 1     ; al = -128, SF = 1, OF = 1
 </code></pre>
-          <p class="petit">Vous connaissiez Z et N depuis votre ALU de 2ARCH : <strong>CF</strong> et <strong>OF</strong> complètent le tableau. Les indicateurs servent à <strong>prendre des décisions</strong> : « si le résultat est nul, sauter ailleurs ». C'est ainsi que s'écrivent les conditions et les boucles.</p>
+          <p class="petit">Vous connaissiez Z et N depuis votre ALU (<em>Arithmetic Logic Unit</em>, l'unité de calcul) de 2ARCH : <strong>CF</strong> et <strong>OF</strong> complètent le tableau. Ces bits sont rangés dans le registre <code>rflags</code>. Les indicateurs servent à <strong>prendre des décisions</strong> : « si le résultat est nul, sauter ailleurs ». C'est ainsi que s'écrivent les conditions et les boucles.</p>
         </div>
       </div>
     </div>
