@@ -807,35 +807,39 @@ $ echo $?
   </section>
 
   <section>
-    <h2>Que contient <code>rax</code> ?</h2>
+    <h2>Et si je modifie <code>hello.asm</code> ?</h2>
     <div class="corps">
       <div class="colonnes code-texte">
-        <pre class="mini" data-titre="subregs.asm" data-code="5"><code class="language-x86asm" data-trim>
-; subregs.asm : écrire dans les sous-registres
+        <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
+section .data
+    msg db "Hello World!", 10
+    len equ $ - msg
+
 section .text
     global _start
-
 _start:
-    mov rax, 0x1122334455667788
-    mov al, 0xFF        ; question 1
-    mov ax, 0           ; question 2
-    mov eax, 5          ; question 3
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, len
+    syscall
 
-    mov rdi, rax        ; code de retour = rax
     mov rax, 60
+    mov rdi, 0
     syscall
 </code></pre>
-        <div>
-          <p class="petit">Que contient <code>rax</code> après chacune des trois questions ? Revoyez le schéma des sous-registres : <code>al</code> = 8 bits, <code>ax</code> = 16 bits, <code>eax</code> = 32 bits.</p>
-          <div class="reponse fragment">1. <code>0x11223344556677<strong>FF</strong></code> : seul l'octet de droite change</div>
-          <div class="reponse fragment">2. <code>0x112233445566<strong>0000</strong></code> : seuls les 16 bits de droite changent</div>
-          <div class="reponse fragment">3. <code>0x<strong>0000000000000005</strong></code> : écrire dans <code>eax</code> efface les 32 bits de gauche (le piège)</div>
-          <div class="reponse fragment"><code>echo $?</code> affiche donc <strong>5</strong></div>
+        <div class="dense">
+          <p><strong>1.</strong> On remplace <code>mov rdx, len</code> par <code>mov rdx, 5</code>. Qu'affiche le programme ?</p>
+          <div class="reponse fragment"><code>Hello</code> : les 5 premiers octets. Sans le saut de ligne, l'invite <code>$</code> se colle au texte</div>
+          <p><strong>2.</strong> On remplace le message par <code>"Bonjour", 10</code>. Que vaut <code>len</code> ? Faut-il changer autre chose ?</p>
+          <div class="reponse fragment">8 (7 lettres + le saut de ligne). Rien d'autre : <code>$ - msg</code> se recalcule</div>
+          <p><strong>3.</strong> On remplace <code>mov rdi, 0</code> par <code>mov rdi, 7</code>. Qu'affiche <code>echo $?</code> ?</p>
+          <div class="reponse fragment">7 : <code>exit</code> renvoie la valeur de <code>rdi</code></div>
         </div>
       </div>
     </div>
     <aside class="notes">
-      Laisser une minute, faire répondre ligne par ligne. Puis vérifier en direct avec echo $?.
+      Faire répondre la salle à chaque question, puis vérifier en direct dans le Codespace en modifiant hello.asm (make hello ; ./hello ; echo $?).
     </aside>
   </section>
 
