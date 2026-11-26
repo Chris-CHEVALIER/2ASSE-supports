@@ -134,24 +134,14 @@ b8 07 00 00 00
   <section>
     <h2>Rappels express d'architecture des ordinateurs</h2>
     <div class="corps">
-      <p>Vous avez vu tout cela en <strong>2ARCH</strong>. En assembleur, vous allez vous en servir à chaque ligne.</p>
-      <div class="colonnes">
-        <div>
-          <ul class="dense">
-            <li>Un <strong>octet</strong> = 8 bits = 2 chiffres hexadécimaux : <code>0xFF</code> = 255, <code>0x2A</code> = 42</li>
-            <li><strong>Complément à deux</strong> : −x = bits de x inversés + 1. Sur 8 bits, −1 s'écrit <code>0xFF</code></li>
-            <li><strong>ASCII</strong> : un caractère = un octet. <code>'0'</code> = <code>0x30</code>, <code>'A'</code> = <code>0x41</code>, saut de ligne = 10 (<code>0x0A</code>)</li>
-          </ul>
-          <p class="petit muet">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal : <code>0x2A</code> vaut 42. Sans préfixe, NASM et GDB lisent du décimal.</p>
-        </div>
-        <div>
-          <ul class="dense">
-            <li><strong>Von Neumann</strong> : processeur, mémoire et entrées-sorties reliés par des bus. Le programme et les données partagent la même mémoire</li>
-            <li><strong>Cycle</strong> : chercher, décoder, exécuter l'instruction, puis passer à la suivante</li>
-            <li><strong>Hiérarchie de la mémoire</strong> : registres, caches, RAM, disque. Plus c'est proche du processeur, plus c'est rapide et petit</li>
-          </ul>
-        </div>
-      </div>
+      <p>Vu en <strong>2ARCH</strong>, utilisé à chaque ligne en assembleur.</p>
+      <ul class="dense">
+        <li>Un <strong>octet</strong> = 8 bits = 2 chiffres hexadécimaux : <code>0xFF</code> = 255, <code>0x2A</code> = 42</li>
+        <li><strong>Complément à deux</strong> : −x = bits de x inversés + 1. Sur 8 bits, −1 s'écrit <code>0xFF</code></li>
+        <li><strong>ASCII</strong> : un caractère = un octet. <code>'0'</code> = <code>0x30</code>, <code>'A'</code> = <code>0x41</code>, saut de ligne = 10 (<code>0x0A</code>)</li>
+        <li><strong>Von Neumann</strong> : le programme et les données sont rangés dans la même mémoire</li>
+      </ul>
+      <p class="petit muet" style="margin-top: 4px;">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal (base 16). Sans préfixe, NASM et GDB lisent du décimal. Chiffres 0 à 9, puis A = 10 … F = 15. Chaque rang vaut 16 fois le précédent : <code>0x2A</code> = 2 × 16 + 10 = 42 et <code>0xFF</code> = 15 × 16 + 15 = 255.</p>
       <div class="encadre marine" style="margin-top: 4px;">Ce qui est nouveau ici : vous ne dessinez plus les circuits, vous les <strong>pilotez</strong> par des instructions.</div>
     </div>
     <aside class="notes">
@@ -166,13 +156,13 @@ b8 07 00 00 00
         <div>
           <p><strong>Des données de plusieurs tailles</strong></p>
           <table class="serre">
-            <tr><th>Taille</th><th>Nom NASM</th><th>Réserver</th></tr>
+            <tr><th>Taille</th><th>Nom NASM</th><th>Directive</th></tr>
             <tr><td>8 bits</td><td><code>byte</code> (octet)</td><td><code>db</code></td></tr>
             <tr><td>16 bits</td><td><code>word</code> (mot)</td><td><code>dw</code></td></tr>
             <tr><td>32 bits</td><td><code>dword</code> (double mot)</td><td><code>dd</code></td></tr>
             <tr><td>64 bits</td><td><code>qword</code> (quadruple mot)</td><td><code>dq</code></td></tr>
           </table>
-          <p class="petit muet">💡 <code>db</code> signifie <em>define byte</em> : il écrit des octets dans le programme.</p>
+          <p class="petit muet">💡 <code>db</code> (<em>define byte</em>) n'est pas une instruction du processeur. C'est une <strong>directive</strong>, un ordre donné à NASM : il écrit ces octets tels quels dans le programme.</p>
         </div>
         <div>
           <p><strong>Le petit-boutisme</strong> (<em>little-endian</em>)</p>
@@ -238,7 +228,7 @@ b8 07 00 00 00
       <div class="colonnes">
         <div>
           <ul class="dense">
-            <li><code>rip</code> (<em>instruction pointer</em>) contient l'<strong>adresse de la prochaine instruction</strong>. Après chaque instruction, il avance jusqu'à la suivante</li>
+            <li><code>rip</code> (<em>instruction pointer</em>) contient l'<strong>adresse de la prochaine instruction</strong>. Le processeur répète sans fin le même <strong>cycle d'exécution</strong> : lire l'instruction rangée à l'adresse <code>rip</code>, faire avancer <code>rip</code> jusqu'à la suivante, puis exécuter l'instruction lue</li>
             <li>Un saut, un appel de fonction ou un retour se contentent de <strong>modifier <code>rip</code></strong></li>
             <li>On ne l'écrit jamais directement : seules les instructions de saut le changent</li>
           </ul>
