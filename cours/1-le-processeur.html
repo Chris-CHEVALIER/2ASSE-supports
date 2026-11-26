@@ -485,12 +485,12 @@ $ echo $?
         <div class="ligne"><span class="nom-reg">ax</span><span class="vide v48"></span><span class="bits b16">16 bits</span></div>
         <div class="ligne"><span class="nom-reg">ah · al</span><span class="vide v48"></span><span class="bits b8">ah</span><span class="bits b8 al">al</span></div>
       </div>
-      <ul class="dense" style="margin-top: 14px;">
+      <ul class="dense" style="margin-top: 4px;">
         <li>Même principe pour <code>rbx</code>, <code>rcx</code>, <code>rdx</code> (<code>ebx</code>, <code>bx</code>, <code>bl</code>…) et pour <code>r8</code> (<code>r8d</code>, <code>r8w</code>, <code>r8b</code>)</li>
-        <li>Écrire dans <code>al</code> ou <code>ax</code> ne modifie <strong>que</strong> ces bits : le reste de <code>rax</code> est conservé</li>
+        <li>Écrire dans <code>al</code> ou <code>ax</code> ne modifie <strong>que</strong> ces bits : le reste de <code>rax</code> est conservé. <strong>Piège</strong> : écrire dans <code>eax</code> met à zéro les 32 bits de poids fort</li>
       </ul>
-      <p class="petit muet">💡 Les lettres : <em>a</em> = <em>accumulator</em>, le registre où « s'accumulent » les résultats des calculs ; <em>r</em> = <em>register</em> (64 bits), <em>e</em> = <em>extended</em> (32 bits), <em>x</em> = <code>ax</code> regroupe <code>ah</code> et <code>al</code>, <em>h</em> = <em>high</em> (octet de poids fort de <code>ax</code>), <em>l</em> = <em>low</em> (octet de poids faible). Pour <code>r8</code> : <em>d</em> = <em>dword</em>, <em>w</em> = <em>word</em>, <em>b</em> = <em>byte</em>.</p>
-      <div class="encadre marine">Piège : écrire dans <code>eax</code> <strong>met à zéro</strong> les 32 bits de poids fort de <code>rax</code>.</div>
+      <p class="petit muet">💡 Les lettres : <em>a</em> = <em>accumulator</em>, le registre où « s'accumulent » les résultats des calculs ; <em>r</em> = <em>register</em>, <em>e</em> = <em>extended</em>, <em>x</em> = <code>ax</code> regroupe <em>h</em> = <em>high</em> et <em>l</em> = <em>low</em>, ses octets de poids fort et faible. Pour <code>r8</code> : <em>d</em> = <em>dword</em>, <em>w</em> = <em>word</em>, <em>b</em> = <em>byte</em>.</p>
+      <div class="encadre usage">Ranger une lettre ASCII (un octet) dans <code>al</code> ou un nombre de 32 bits dans <code>eax</code>.</div>
     </div>
   </section>
 
@@ -559,7 +559,7 @@ $ ./pin ; echo $?
           <p class="petit muet">💡 Avec <code>mov rax, 1111</code>, <code>echo $?</code> affiche 1.</p>
         </div>
       </div>
-      <div class="encadre usage"><code>coffre</code> fait exactement cela : une comparaison, puis un saut.</div>
+      <div class="encadre usage">Le <code>coffre</code> du début de cours fait de même : il compare le mot de passe saisi, puis saute.</div>
     </div>
     <aside class="notes">
       Démo en direct : assembler, lancer, puis remplacer 1234 par 1111. Dans GDB, info registers eflags montre ZF juste après cmp (le TP1 le fait faire).
@@ -606,7 +606,7 @@ _start:
             <li><code>section .data</code> : les <strong>données</strong> ; <code>section .text</code> : le <strong>code</strong></li>
             <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, c'est-à-dire des noms donnés à une adresse. <code>msg</code> joue le rôle d'une <strong>variable</strong> (là où sont rangées les données), <code>_start</code> celui du <code>main</code> d'un programme C (la première instruction exécutée)</li>
             <li><code>db</code> (<em>define byte</em>) range des octets : les 12 caractères du message, puis 10, le saut de ligne</li>
-            <li><code>len equ $ - msg</code> : <code>equ</code> (<em>equate</em>) donne un nom à une constante. <code>$</code> est l'adresse où NASM écrit à cet endroit, juste après le message : <code>0x40200d</code>. <code>len</code> = <code>0x40200d</code> − <code>0x402000</code> = 13 octets</li>
+            <li><code>len equ $ - msg</code> : <code>equ</code> (<em>equate</em>) donne un nom à une constante. <code>$</code> est l'adresse elle-même (pas son contenu) où NASM écrit à cet endroit, juste après le message : <code>0x40200d</code>. <code>len</code> = <code>0x40200d</code> − <code>0x402000</code> = 13 octets</li>
           </ul>
         </div>
       </div>
