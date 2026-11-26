@@ -186,16 +186,14 @@ b8 07 00 00 00
     <div class="corps">
       <div class="colonnes schema-texte">
         <div>
-          <p class="petit">Les mêmes 8 bits se lisent de deux façons. En lecture <strong>non signée</strong>, le nombre est toujours positif : de 0 à 255. En lecture <strong>signée</strong>, il peut être négatif : de −128 à 127.</p>
-          <table class="serre">
-            <tr><th>Bits</th><th>Hexa</th><th>Lecture non signée</th><th>Lecture signée</th></tr>
-            <tr><td><code>00000001</code></td><td><code>0x01</code></td><td>1</td><td>1</td></tr>
-            <tr><td><code>01111111</code></td><td><code>0x7F</code></td><td>127</td><td>127</td></tr>
-            <tr><td><code>10000000</code></td><td><code>0x80</code></td><td>128</td><td>−128</td></tr>
-            <tr><td><code>11111110</code></td><td><code>0xFE</code></td><td>254</td><td>−2</td></tr>
-            <tr><td><code>11111111</code></td><td><code>0xFF</code></td><td>255</td><td>−1</td></tr>
+          <p class="petit">Un nombre <strong>signé</strong> porte un signe, + ou −. Seul le bit de gauche change de valeur : 128 en lecture <strong>non signée</strong> (0 à 255), −128 en lecture <strong>signée</strong> (−128 à 127).</p>
+          <table class="indices">
+            <tr><th>non signée</th><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr>
+            <tr class="car"><th>signée</th><td>−128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr>
           </table>
-          <p class="petit muet">💡 En lecture signée, un bit de gauche à 1 signale un nombre négatif.</p>
+          <p class="petit"><code>11111111</code> = <code>0xFF</code> se lit 255 en non signé, mais −128&nbsp;+&nbsp;64&nbsp;+&nbsp;32&nbsp;+&nbsp;16&nbsp;+&nbsp;8&nbsp;+&nbsp;4&nbsp;+&nbsp;2&nbsp;+&nbsp;1 = −1 en signé.</p>
+          <p class="petit"><strong>En signé, un bit de gauche à 1 signale un nombre négatif.</strong></p>
+          <p class="petit muet">💡 255 ne s'écrit pas en signé sur 8 bits : il faut 16&nbsp;bits (de&nbsp;−32&nbsp;768 à 32&nbsp;767).</p>
         </div>
         <div>
           <p><strong>Écrire −1 sur 8 bits</strong></p>
@@ -208,7 +206,7 @@ b8 07 00 00 00
           <p class="petit muet">💡 Vérification : <code>11111111</code> + 1 = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits : il reste 0, donc c'est bien −1.</p>
         </div>
       </div>
-      <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur calcule pareil. C'est <strong>vous, dans le programme</strong>, qui choisissez la lecture : pour multiplier, <code>mul</code> lit en non signé et <code>imul</code> en signé.</div>
+      <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : c'est <strong>vous, dans le programme</strong>, qui choisissez la lecture. Pour multiplier, <code>mul</code> lit en non signé et <code>imul</code> (<em>i</em> pour <em>integer</em>, entier) en signé.</div>
     </div>
     <aside class="notes">
       Faire calculer −2 à la salle : 00000010, inversé 11111101, plus 1 : 11111110 = 0xFE. Cette notion sert au TP1 (−1 dans rbx, neg rax, 3 − 5 et les drapeaux) et aux sauts signés jl / non signés jb du cours 2.
@@ -222,17 +220,18 @@ b8 07 00 00 00
         <div>
           <p><strong>Des données de plusieurs tailles</strong></p>
           <table class="serre">
-            <tr><th>Taille</th><th>Nom</th><th>Pseudo-instruction</th></tr>
-            <tr><td>8 bits</td><td><code>byte</code> (octet)</td><td><code>db</code></td></tr>
-            <tr><td>16 bits</td><td><code>word</code> (mot)</td><td><code>dw</code></td></tr>
-            <tr><td>32 bits</td><td><code>dword</code> (double mot)</td><td><code>dd</code></td></tr>
-            <tr><td>64 bits</td><td><code>qword</code> (quadruple mot)</td><td><code>dq</code></td></tr>
+            <tr><th>Taille</th><th>Nom</th><th>NASM</th><th>Pour ranger…</th></tr>
+            <tr><td style="white-space:nowrap">8 bits</td><td><code>byte</code></td><td><code>db</code></td><td>un caractère</td></tr>
+            <tr><td style="white-space:nowrap">16 bits</td><td><code>word</code></td><td><code>dw</code></td><td>un entier ≤&nbsp;65&nbsp;535</td></tr>
+            <tr><td style="white-space:nowrap">32 bits</td><td><code>dword</code></td><td><code>dd</code></td><td>un entier ≤&nbsp;4&nbsp;milliards</td></tr>
+            <tr><td style="white-space:nowrap">64 bits</td><td><code>qword</code></td><td><code>dq</code></td><td>un grand entier, une adresse</td></tr>
           </table>
+          <p class="petit muet">💡 Chaque donnée prend la place dont elle a besoin. <code>byte</code> = octet. <code>word</code> (mot) : 16 bits, la taille de travail des premiers x86. <code>dword</code> et <code>qword</code> : double et quadruple mot.</p>
           <p class="petit muet">💡 <code>db</code> (<em>define byte</em>) n'est pas une instruction du processeur mais une <strong>pseudo-instruction</strong> : l'assembleur écrit ces octets dans le programme.</p>
         </div>
         <div>
           <p><strong>Le petit-boutisme</strong> (<em>little-endian</em>)</p>
-          <p class="petit">Un nombre de plusieurs octets est rangé en mémoire <strong>en commençant par l'octet de poids faible</strong>, celui de droite. Le dword <code>0x11223344</code> donne :</p>
+          <p class="petit">Un nombre de plusieurs octets est rangé en mémoire <strong>en commençant par l'octet de poids faible</strong>. C'est celui qui vaut le moins : les deux chiffres hexa de droite. Le dword <code>0x11223344</code> donne :</p>
           <table class="indices">
             <tr><th>Adresse</th><td>+0</td><td>+1</td><td>+2</td><td>+3</td></tr>
             <tr class="car"><th>Octet</th><td>44</td><td>33</td><td>22</td><td>11</td></tr>
