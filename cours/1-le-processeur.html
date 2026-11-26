@@ -73,47 +73,44 @@ Coffre ouvert.
   </section>
 
   <section>
-    <h2>Notre fil rouge : <code>total.asm</code></h2>
+    <h2>Notre fil rouge : <code>hello.asm</code></h2>
     <div class="corps">
       <div class="colonnes code-texte">
-        <pre class="micro" data-titre="total.asm" data-code="12" data-sortie="Calcul de 7 + 5\n"><code class="language-x86asm" data-trim>
-; total.asm : affiche un message puis renvoie 7 + 5
+        <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
+; hello.asm : affiche un message puis quitte
 section .data
-    msg   db "Calcul de 7 + 5", 10  ; texte ASCII, saut de ligne
-    len   equ $ - msg               ; longueur du message
-    total dq 1000                   ; un nombre sur 8 octets
+    msg db "Hello World!", 10   ; texte ASCII + saut de ligne
+    len equ $ - msg             ; longueur du message
 
 section .text
     global _start
-
 _start:
-    mov rax, 1          ; appel système write : afficher
-    mov rdi, 1          ; sur l'écran
-    mov rsi, msg        ; le message
-    mov rdx, len        ; de len octets
+    mov rax, 1      ; write : afficher
+    mov rdi, 1      ; sur l'écran
+    mov rsi, msg    ; le message
+    mov rdx, len    ; de len octets
     syscall
 
-    mov rdi, 7          ; rdi = 7
-    add rdi, 5          ; rdi = rdi + 5
-    mov rax, 60         ; appel système exit : quitter
-    syscall             ; en renvoyant rdi
+    mov rax, 60     ; exit : quitter
+    mov rdi, 0      ; code de retour 0
+    syscall
 </code></pre>
         <div>
           <pre class="terminal mini" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
-$ nasm -f elf64 total.asm -o total.o
-$ ld total.o -o total
-$ ./total
-Calcul de 7 + 5
+$ nasm -f elf64 hello.asm -o hello.o
+$ ld hello.o -o hello
+$ ./hello
+Hello World!
 $ echo $?
-12
+0
 </code></pre>
-          <p class="petit">Le programme affiche un message, calcule 7&nbsp;+&nbsp;5 puis s'arrête en renvoyant le résultat, son <strong>code de retour</strong>. <code>echo $?</code> affiche le code de retour du dernier programme lancé.</p>
+          <p class="petit">Le programme affiche un message puis s'arrête en renvoyant un nombre, son <strong>code de retour</strong> : 0 signifie que tout s'est bien passé. <code>echo $?</code> affiche le code de retour du dernier programme lancé.</p>
           <p class="petit muet">💡 Ne cherchez pas encore à tout comprendre : chaque ligne est expliquée au fil du cours.</p>
         </div>
       </div>
     </div>
     <aside class="notes">
-      Démo en direct dans le Codespace (source dans corriges/demos/total.asm) : taper les quatre commandes. Les étudiants le refont au début du TP1.
+      Démo en direct dans le Codespace (même code que la diapo « Hello World! » du chapitre 4) : taper les quatre commandes. Les étudiants le refont au début du TP1.
     </aside>
   </section>
 
@@ -132,16 +129,16 @@ total = total + 5;
         <div class="carte">
           <h3>Assembleur x86-64</h3>
           <pre class="compact" data-titre="total.asm" data-extrait><code class="language-x86asm" data-trim>
-mov rdi, 7
-add rdi, 5
+mov eax, 7
+add eax, 5
 </code></pre>
           <p class="petit">Une ligne = une instruction au processeur</p>
         </div>
         <div class="carte">
           <h3>Langage machine</h3>
           <pre class="compact" data-titre="octets en mémoire"><code class="language-plaintext" data-trim>
-bf 07 00 00 00
-48 83 c7 05
+b8 07 00 00 00
+83 c0 05
 </code></pre>
           <p class="petit">Les octets que le processeur lit et exécute</p>
         </div>
@@ -153,7 +150,7 @@ bf 07 00 00 00
       <div class="encadre usage">Sans code source, on n'a que le langage machine. Le retraduire en assembleur révèle ce que fait le programme.</div>
     </div>
     <aside class="notes">
-      Ce sont les deux lignes de calcul de total.asm. Faire remarquer que le 7 apparaît dans les octets : bf = « mov edi, valeur » (NASM raccourcit mov rdi, 7), puis 07 00 00 00 = 7 sur 4 octets, à l'envers (petit-boutisme, section suivante).
+      Faire remarquer que le 7 apparaît dans les octets : b8 = « mov eax, valeur », puis 07 00 00 00 = 7 sur 4 octets, à l'envers (petit-boutisme, section suivante).
       Les octets viennent d'objdump sur le programme assemblé par NASM.
     </aside>
   </section>
@@ -162,10 +159,10 @@ bf 07 00 00 00
     <h2>De la source à l'exécutable</h2>
     <div class="corps">
       <div class="frise chaine">
-        <div class="etape"><div class="date"><code>total.asm</code></div><ul><li>Code source en assembleur, écrit par vous</li></ul></div>
-        <div class="etape"><div class="date">NASM</div><ul><li>L'<strong>assembleur</strong> traduit chaque instruction en octets</li><li>Produit <code>total.o</code></li></ul></div>
-        <div class="etape"><div class="date">ld</div><ul><li>L'<strong>éditeur de liens</strong> place le code et les données en mémoire et fixe leurs adresses mémoire</li><li>Produit <code>total</code></li></ul></div>
-        <div class="etape marine"><div class="date"><code>./total</code></div><ul><li>Le système charge l'exécutable en mémoire et le lance</li></ul></div>
+        <div class="etape"><div class="date"><code>hello.asm</code></div><ul><li>Code source en assembleur, écrit par vous</li></ul></div>
+        <div class="etape"><div class="date">NASM</div><ul><li>L'<strong>assembleur</strong> traduit chaque instruction en octets</li><li>Produit <code>hello.o</code></li></ul></div>
+        <div class="etape"><div class="date">ld</div><ul><li>L'<strong>éditeur de liens</strong> place le code et les données en mémoire et fixe leurs adresses mémoire</li><li>Produit <code>hello</code></li></ul></div>
+        <div class="etape marine"><div class="date"><code>./hello</code></div><ul><li>Le système charge l'exécutable en mémoire et le lance</li></ul></div>
       </div>
       <div class="colonnes" style="margin-top: 22px;">
         <div class="encadre">
@@ -248,10 +245,31 @@ bf 07 00 00 00
           </ul>
         </div>
       </div>
-      <div class="encadre usage" style="margin-top: 6px;">Le message de <code>total.asm</code> est rangé en <code style="white-space: nowrap">43 61 6c 63 75 6c…</code> (<code>"Calcul…"</code>). C'est en cherchant ces codes que <code>strings</code> trouve du texte.</div>
+      <div class="encadre usage" style="margin-top: 6px;">Le message de <code>hello.asm</code> est rangé en <code style="white-space: nowrap">48 65 6c 6c 6f…</code> (<code>"Hello…"</code>). C'est en cherchant ces codes que <code>strings</code> trouve du texte.</div>
     </div>
     <aside class="notes">
       Rappel de 2ARCH, utile au TP1 (afficher un nombre, passer en majuscule) et au TP3 (décoder les octets d'un mot de passe). Faire convertir 'H' en binaire à la salle : 72 = 64 + 8 = 01001000.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Le message de <code>hello</code>, octet par octet</h2>
+    <div class="corps">
+      <pre class="terminal compact" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
+$ objdump -s -j .data hello
+Contents of section .data:
+ 402000 48656c6c 6f20576f 726c6421 0a        Hello World!.
+</code></pre>
+      <p class="petit muet">💡 <code>objdump -s -j .data</code> affiche le contenu de la section des données : l'adresse, les octets en hexa par groupes de 4, puis leur lecture en ASCII.</p>
+      <ul class="dense">
+        <li><code>48 65 6c 6c 6f</code> : <code>"Hello"</code>, un octet par caractère. <code>20</code> est l'espace</li>
+        <li><code>0a</code> : le saut de ligne (10), le <code>, 10</code> de la ligne <code>msg db</code></li>
+        <li>13 octets en tout : c'est la valeur de <code>len</code></li>
+      </ul>
+      <div class="encadre usage">Au TP3, vous lirez ainsi les octets de programmes pour retrouver leurs mots de passe.</div>
+    </div>
+    <aside class="notes">
+      Démo en direct dans le Codespace. Faire retrouver à la salle : 'H', 8e lettre, = 0x48 ; 'l', 12e lettre en minuscule, = 0x60 + 12 = 0x6c.
     </aside>
   </section>
 
@@ -288,35 +306,34 @@ bf 07 00 00 00
   </section>
 
   <section>
-    <h2>En direct : <code>total.asm</code> calcule 3 − 5</h2>
+    <h2>En direct : <code>hello.asm</code> renvoie −2</h2>
     <div class="corps">
       <div class="colonnes">
         <div>
-          <p class="petit">Je remplace les deux lignes de calcul :</p>
-          <pre class="compact" data-titre="total.asm (extrait modifié)" data-extrait><code class="language-x86asm" data-trim>
-mov rdi, 3          ; rdi = 3
-sub rdi, 5          ; rdi = rdi - 5
+          <p class="petit">Je change le code de retour :</p>
+          <pre class="compact" data-titre="hello.asm (extrait modifié)" data-extrait><code class="language-x86asm" data-trim>
+mov rax, 60     ; exit : quitter
+mov rdi, -2     ; code de retour −2
 </code></pre>
           <pre class="terminal compact" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
-$ ./total
-Calcul de 7 + 5
+$ ./hello
+Hello World!
 $ echo $?
 254
 </code></pre>
         </div>
         <div>
-          <p class="petit">Le calcul donne bien −2, soit <code>11111110</code> sur 8 bits. Mais Linux lit le code de retour comme <strong>un octet non signé</strong> : il affiche 254.</p>
+          <p class="petit">Le programme renvoie bien −2, soit <code>11111110</code> sur 8 bits. Mais Linux lit le code de retour comme <strong>un octet non signé</strong> : il affiche 254.</p>
           <table class="indices">
             <tr><th>−2</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
           </table>
           <p class="petit">Lecture signée : −128&nbsp;+&nbsp;126 = −2. Lecture non signée : 128&nbsp;+&nbsp;126 = 254.</p>
-          <p class="petit muet">💡 Le message n'a pas changé : seul le calcul a été modifié.</p>
-        </div>
+                  </div>
       </div>
       <div class="encadre usage">Les mêmes octets, deux lectures. C'est le programme qui lit les octets qui décide : ici Linux, qui attend un code de retour de 0 à 255.</div>
     </div>
     <aside class="notes">
-      Démo en direct : modifier les deux lignes dans le Codespace, réassembler (nasm puis ld) et relancer. Faire prédire le résultat à la salle avant echo $?.
+      Démo en direct : remplacer 0 par -2 dans le Codespace, réassembler (nasm puis ld) et relancer. Faire prédire le résultat à la salle avant echo $?.
     </aside>
   </section>
 
@@ -343,33 +360,12 @@ $ echo $?
             <tr><th>Adresse</th><td>+0</td><td>+1</td><td>+2</td><td>+3</td></tr>
             <tr class="car"><th>Octet</th><td>44</td><td>33</td><td>22</td><td>11</td></tr>
           </table>
-          <p class="petit"><strong>Pourquoi c'est utile</strong> : les outils affichent la mémoire octet par octet, donc un nombre y apparaît à l'envers. Vérifions-le sur <code>total</code>.</p>
+          <p class="petit"><strong>Pourquoi c'est utile</strong> : les outils affichent la mémoire octet par octet, donc un nombre y apparaît à l'envers. <code>total dq 1000</code> (soit <code>0x3E8</code>) s'affiche <code>e8 03 00 00 00 00 00 00</code> : <code>dq</code> occupe toujours 8 octets, même si 1000 n'en remplit que 2.</p>
         </div>
       </div>
     </div>
     <aside class="notes">
       Le petit-boutisme n'a pas été vu en 2ARCH : il piège tout le monde la première fois qu'on lit la mémoire dans GDB. On le retrouve au TP1.
-    </aside>
-  </section>
-
-  <section>
-    <h2>Les données de <code>total</code>, octet par octet</h2>
-    <div class="corps">
-      <pre class="terminal compact" data-titre="Terminal du Codespace"><code class="language-plaintext" data-trim>
-$ objdump -s -j .data total
-Contents of section .data:
- 402000 43616c63 756c2064 65203720 2b20350a  Calcul de 7 + 5.
- 402010 e8030000 00000000                    ........
-</code></pre>
-      <p class="petit muet">💡 <code>objdump -s -j .data</code> affiche le contenu de la section des données : l'adresse, les octets en hexa par groupes de 4, puis leur lecture en ASCII.</p>
-      <ul class="dense">
-        <li><code>43 61 6c 63 75 6c…</code> : le message <code>msg</code>, un octet par caractère. Il finit par <code>0a</code>, le saut de ligne (10)</li>
-        <li><code>e8 03 00 00 00 00 00 00</code> : <code>total dq 1000</code>. 1000 = <code>0x3E8</code>, rangé <strong>poids faible en premier</strong> : <code>e8</code> puis <code>03</code>. <code>dq</code> occupe toujours <strong>8 octets</strong> : les autres valent 0</li>
-      </ul>
-      <div class="encadre usage">Au TP3, vous lirez ainsi les octets de programmes pour retrouver leurs mots de passe.</div>
-    </div>
-    <aside class="notes">
-      Démo en direct dans le Codespace. Faire retrouver à la salle : 0x43 = 'C', 8 + 3 = 11e lettre en minuscule = 0x6c = 'l'.
     </aside>
   </section>
 
@@ -533,21 +529,20 @@ add al, 1     ; al = -128, SF = 1, OF = 1
         <pre class="mini" data-titre="hello.asm" data-code="0" data-sortie="Hello World!\n"><code class="language-x86asm" data-trim>
 ; hello.asm : affiche un message puis quitte
 section .data
-    msg db "Hello World!", 10       ; 10 = saut de ligne
-    len equ $ - msg                 ; longueur du message
+    msg db "Hello World!", 10   ; texte ASCII + saut de ligne
+    len equ $ - msg             ; longueur du message
 
 section .text
-    global _start                   ; point d'entrée
-
+    global _start
 _start:
-    mov rax, 1          ; appel système n° 1 : write
-    mov rdi, 1          ; descripteur 1 : la sortie standard
-    mov rsi, msg        ; adresse du message
-    mov rdx, len        ; nombre d'octets à écrire
-    syscall             ; le noyau affiche le message
+    mov rax, 1      ; write : afficher
+    mov rdi, 1      ; sur l'écran
+    mov rsi, msg    ; le message
+    mov rdx, len    ; de len octets
+    syscall
 
-    mov rax, 60         ; appel système n° 60 : exit
-    mov rdi, 0          ; code de retour 0 : tout va bien
+    mov rax, 60     ; exit : quitter
+    mov rdi, 0      ; code de retour 0
     syscall
 </code></pre>
         <div class="dense">
