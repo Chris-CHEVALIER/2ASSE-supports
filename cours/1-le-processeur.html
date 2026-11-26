@@ -140,8 +140,7 @@ b8 07 00 00 00
         <li><strong>ASCII</strong> : un caractère = un octet. <code>'0'</code> = <code>0x30</code>, <code>'A'</code> = <code>0x41</code>, saut de ligne = 10 (<code>0x0A</code>)</li>
         <li><strong>Von Neumann</strong> : le programme et les données sont rangés dans la même mémoire</li>
       </ul>
-      <p class="petit muet" style="margin-top: 4px;">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal (base 16). Sans préfixe, NASM et GDB lisent du décimal. Chiffres 0 à 9, puis A = 10 … F = 15. Chaque rang vaut 16 fois le précédent : <code>0x2A</code> = 2 × 16 + 10 = 42 et <code>0xFF</code> = 15 × 16 + 15 = 255.</p>
-      <p class="petit muet">💡 <strong>GDB</strong> signifie <em>GNU Debugger</em> : le débogueur, l'outil qui exécute un programme pas à pas pour l'observer. <strong>GNU</strong> (<em>GNU's Not Unix</em>) est un projet de logiciels libres lancé en 1983, auquel appartient aussi <code>ld</code>, l'éditeur de liens.</p>
+      <p class="petit muet" style="margin-top: 4px;">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal (base 16). Sans préfixe, un nombre est lu en décimal. Chiffres 0 à 9, puis A = 10 … F = 15. Chaque rang vaut 16 fois le précédent : <code>0x2A</code> =&nbsp;2&nbsp;×&nbsp;16&nbsp;+&nbsp;10&nbsp;=&nbsp;42 et <code>0xFF</code> =&nbsp;15&nbsp;×&nbsp;16&nbsp;+&nbsp;15&nbsp;=&nbsp;255.</p>
       <div class="encadre marine" style="margin-top: 4px;">Ce qui est nouveau ici : vous ne dessinez plus les circuits, vous les <strong>pilotez</strong> par des instructions.</div>
     </div>
     <aside class="notes">
@@ -170,7 +169,6 @@ b8 07 00 00 00
           <ul class="dense">
             <li><strong>Chiffres</strong> : le code d'un chiffre vaut ce chiffre + 48 (<code>0x30</code>). <code>'7'</code> = 7 + 48 = 55</li>
             <li><strong>Lettres</strong> : rangées dans l'ordre. Une minuscule vaut sa majuscule + 32 : <code>'a'</code> − <code>'A'</code> = 97 − 65</li>
-            <li>Dans GDB, <code>p/c 72</code> affiche le caractère et <code>p/d 'H'</code> son code</li>
           </ul>
           <p class="petit muet">💡 Table complète : <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange" target="_blank">ASCII sur Wikipédia</a>. Elle code 128 caractères, de 0 à 127.</p>
         </div>
@@ -223,13 +221,13 @@ b8 07 00 00 00
         <div>
           <p><strong>Des données de plusieurs tailles</strong></p>
           <table class="serre">
-            <tr><th>Taille</th><th>Nom NASM</th><th>Pseudo-instruction</th></tr>
+            <tr><th>Taille</th><th>Nom</th><th>Pseudo-instruction</th></tr>
             <tr><td>8 bits</td><td><code>byte</code> (octet)</td><td><code>db</code></td></tr>
             <tr><td>16 bits</td><td><code>word</code> (mot)</td><td><code>dw</code></td></tr>
             <tr><td>32 bits</td><td><code>dword</code> (double mot)</td><td><code>dd</code></td></tr>
             <tr><td>64 bits</td><td><code>qword</code> (quadruple mot)</td><td><code>dq</code></td></tr>
           </table>
-          <p class="petit muet">💡 <code>db</code> (<em>define byte</em>) n'est pas une instruction du processeur mais une <strong>pseudo-instruction</strong> : NASM écrit ces octets dans le programme.</p>
+          <p class="petit muet">💡 <code>db</code> (<em>define byte</em>) n'est pas une instruction du processeur mais une <strong>pseudo-instruction</strong> : l'assembleur écrit ces octets dans le programme.</p>
         </div>
         <div>
           <p><strong>Le petit-boutisme</strong> (<em>little-endian</em>)</p>
@@ -238,7 +236,7 @@ b8 07 00 00 00
             <tr><th>Adresse</th><td>+0</td><td>+1</td><td>+2</td><td>+3</td></tr>
             <tr class="car"><th>Octet</th><td>44</td><td>33</td><td>22</td><td>11</td></tr>
           </table>
-          <p class="petit"><strong>Pourquoi c'est utile</strong> : GDB affiche la mémoire octet par octet, donc un nombre y apparaît à l'envers. <code>total dq 1000</code> (soit <code>0x3E8</code>) s'affiche <code>e8 03 00 00 00 00 00 00</code>.</p>
+          <p class="petit"><strong>Pourquoi c'est utile</strong> : un débogueur affiche la mémoire octet par octet, donc un nombre y apparaît à l'envers. <code>total dq 1000</code> (soit <code>0x3E8</code>) s'affiche <code>e8 03 00 00 00 00 00 00</code>.</p>
         </div>
       </div>
     </div>
@@ -277,7 +275,7 @@ b8 07 00 00 00
         <tr><td>Un OpCode de 2 bits choisit l'opération de l'ALU</td><td>Une <strong>instruction</strong> : <code>add</code>, <code>sub</code>, <code>and</code>, <code>or</code>… codée sur 1 à 15 octets</td></tr>
         <tr><td>Indicateurs Z et N</td><td>ZF et SF, plus <strong>CF</strong> (retenue) et <strong>OF</strong> (débordement signé)</td></tr>
         <tr><td>Vous jouiez l'unité de contrôle en réglant les broches</td><td>Le <strong>programme</strong> le fait : le processeur lit les instructions en mémoire, une par une</td></tr>
-        <tr><td>Une horloge en tick manuel</td><td>Environ 3 milliards de cycles par seconde, ou une instruction à la fois avec GDB</td></tr>
+        <tr><td>Une horloge en tick manuel</td><td>Environ 3 milliards de cycles par seconde, ou une instruction à la fois avec un débogueur</td></tr>
       </table>
       <div class="encadre" style="margin-top: 12px;">Votre question bonus « 7 + 2 = 1001 allume N » trouve sa réponse en x86-64 : l'indicateur <strong>OF</strong> signale ce débordement signé.</div>
     </div>
@@ -586,7 +584,7 @@ _start:
   <section>
     <h2>Un débogueur pour voir l'invisible</h2>
     <div class="corps">
-      <p>Un programme en assembleur n'affiche presque rien. <strong>GDB</strong> (<em>GNU Debugger</em>) permet de l'exécuter <strong>instruction par instruction</strong> et d'observer les registres et la mémoire.</p>
+      <p>Un programme en assembleur n'affiche presque rien. <strong>GDB</strong> (<em>GNU Debugger</em>) l'exécute <strong>instruction par instruction</strong> pour observer registres et mémoire.</p>
       <table class="serre">
         <tr><th>Commande</th><th>Abrégé</th><th>Effet</th></tr>
         <tr><td><code>gdb ./compute</code></td><td></td><td>ouvre le programme dans GDB (sans le lancer)</td></tr>
@@ -598,6 +596,7 @@ _start:
         <tr><td><code>layout regs</code></td><td></td><td>affiche en permanence le code et les registres</td></tr>
         <tr><td><code>continue</code> / <code>quit</code></td><td><code>c</code> / <code>q</code></td><td>reprend l'exécution / quitte GDB</td></tr>
       </table>
+      <p class="petit muet">💡 <strong>GNU</strong> (<em>GNU's Not Unix</em>) est un projet de logiciels libres lancé en 1983, dont fait aussi partie <code>ld</code>.</p>
       <p class="petit muet">Une ligne vide répète la dernière commande : <kbd>Entrée</kbd> après <code>si</code> avance d'une instruction de plus.</p>
     </div>
   </section>
