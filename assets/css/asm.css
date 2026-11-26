@@ -44,3 +44,12 @@
 /* Listings longs (programmes complets de 20 à 28 lignes) */
 .reveal .corps pre.micro, .reveal .corps .colonnes pre.micro { font-size: 13px; line-height: 1.32; margin-bottom: 0; }
 .reveal .corps pre.micro code { padding: 8px 14px; max-height: 470px; }
+
+/* Encadré « À quoi ça sert ? » : l'usage concret d'une notion */
+.reveal .encadre.usage { background: var(--ambre-clair); border-left-color: var(--ambre); }
+.reveal .encadre.usage::before { content: "🎯 À quoi ça sert ? "; font-weight: 700; }
+
+/* Image d'illustration avec sa légende */
+.reveal figure.illustration { margin: 0; text-align: center; }
+.reveal figure.illustration img { max-width: 100%; border: 1px solid var(--gris-clair); border-radius: 6px; }
+.reveal figure.illustration figcaption { font-size: 15px; color: #5B6E8F; margin-top: 4px; }

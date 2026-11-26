@@ -22,6 +22,36 @@
     </div>
   </section>
 
+  <section>
+    <h2>Un programme sans son code source</h2>
+    <div class="corps">
+      <div class="colonnes code-texte">
+        <pre class="terminal" data-titre="Terminal"><code class="language-plaintext" data-trim>
+$ ./coffre
+Mot de passe : devine
+Mauvais mot de passe.
+$ strings coffre | head -4
+Mot de passe :
+Cosmo2026
+Coffre ouvert.
+Mauvais mot de passe.
+$ ./coffre
+Mot de passe : Cosmo2026
+Coffre ouvert.
+</code></pre>
+        <div>
+          <p class="petit">Je n'ai que l'exécutable <code>coffre</code>, pas son code. <code>strings</code> affiche les suites d'octets qui ressemblent à du texte : le mot de passe était rangé <strong>en clair</strong> dans le programme.</p>
+          <p class="petit">Ce module vous apprend à lire ces octets. Au TP3, vous retrouverez vous-même les mots de passe de trois programmes.</p>
+          <p class="petit muet">⚠️ Ranger un mot de passe en clair est une faute de sécurité.</p>
+        </div>
+      </div>
+      <div class="encadre usage">C'est le métier de l'analyste en cybersécurité : comprendre un logiciel malveillant, qui n'est jamais livré avec son code source.</div>
+    </div>
+    <aside class="notes">
+      Démo en direct dans le Codespace (source dans corriges/demos/coffre.asm, construit avec « ld -s » pour retirer les noms). Faire deviner le mot de passe à la salle avant de lancer strings.
+    </aside>
+  </section>
+
   <section data-layout="sommaire">
     <h1>Sommaire</h1>
     <ol>
@@ -75,6 +105,7 @@ b8 07 00 00 00
         <li>Le <strong>langage machine</strong> est une suite d'octets : c'est la seule chose que le processeur comprend</li>
         <li>L'<strong>assembleur</strong> (ou langage d'assemblage) donne un nom lisible à chaque instruction : <code>mov</code>, <code>add</code>… Ces noms s'appellent des <strong>mnémoniques</strong></li>
       </ul>
+      <div class="encadre usage">Sans code source, on n'a que le langage machine. Le retraduire en assembleur révèle ce que fait le programme.</div>
     </div>
     <aside class="notes">
       Faire remarquer que le 7 apparaît dans les octets : b8 = « mov eax, valeur », puis 07 00 00 00 = 7 sur 4 octets, à l'envers (petit-boutisme, section suivante).
@@ -113,9 +144,8 @@ b8 07 00 00 00
         <tr><td><strong>ARM</strong> (AArch64)</td><td>Smartphones, Mac à puce Apple, Raspberry Pi</td><td><code>add w0, w0, #5</code></td></tr>
         <tr><td><strong>RISC-V</strong></td><td>Architecture ouverte et libre de droits, en plein essor</td><td><code>addi a0, a0, 5</code></td></tr>
       </table>
-      <div class="encadre" style="margin-top: 10px;">
-        Dans ce module : <strong>x86-64</strong> sous <strong>Linux</strong>, avec la <strong>syntaxe Intel</strong> (destination à gauche). Un programme assemblé pour x86-64 ne tourne pas tel quel sur un processeur ARM.
-      </div>
+      <div class="encadre usage" style="margin-top: 10px;">Une application existe donc en version «&nbsp;Intel&nbsp;» et en version «&nbsp;Apple Silicon&nbsp;». Un Mac récent (ARM) ne lance pas nos programmes : nous travaillons dans un Codespace, une vraie machine x86-64.</div>
+      <p class="petit muet">Dans ce module : x86-64 sous Linux, avec la syntaxe Intel (destination à gauche).</p>
     </div>
     <aside class="notes">
       Les Mac récents sont en ARM : c'est pour cela que nous travaillons dans Codespaces, qui fournit une vraie machine x86-64.
@@ -141,7 +171,7 @@ b8 07 00 00 00
         <li><strong>Von Neumann</strong> : le programme et les données sont rangés dans la même mémoire</li>
       </ul>
       <p class="petit muet" style="margin-top: 4px;">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal (base 16). Sans préfixe, un nombre est lu en décimal. Chiffres 0 à 9, puis A = 10 … F = 15. Chaque rang vaut 16 fois le précédent : <code>0x2A</code> =&nbsp;2&nbsp;×&nbsp;16&nbsp;+&nbsp;10&nbsp;=&nbsp;42 et <code>0xFF</code> =&nbsp;15&nbsp;×&nbsp;16&nbsp;+&nbsp;15&nbsp;=&nbsp;255.</p>
-      <div class="encadre marine" style="margin-top: 4px;">Ce qui est nouveau ici : vous ne dessinez plus les circuits, vous les <strong>pilotez</strong> par des instructions.</div>
+      <div class="encadre usage" style="margin-top: 4px;">L'hexadécimal est la langue des outils : un débogueur affiche registres, adresses et octets en hexa. Un octet s'y écrit en 2 chiffres, contre 8 en binaire.</div>
     </div>
     <aside class="notes">
       Diapo de rappel, 3 minutes au plus. Interroger la salle : « qui se souvient de la soustraction dans votre ALU Logisim ? »
@@ -174,7 +204,7 @@ b8 07 00 00 00
           <p class="petit muet">💡 Table complète : <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange" target="_blank">ASCII sur Wikipédia</a>. Elle code 128 caractères, de 0 à 127.</p>
         </div>
       </div>
-      <div class="encadre marine" style="margin-top: 6px;">En mémoire, <code>"Hi"</code> n'est que deux octets : <code>48 69</code>. Le processeur ne voit que des nombres.</div>
+      <div class="encadre usage" style="margin-top: 6px;">Dans <code>hello.asm</code>, <code>"Hello"</code> est rangé en <code style="white-space: nowrap">48 65 6c 6c 6f</code>. C'est en cherchant ces codes que <code>strings</code> trouve le mot de passe de <code>coffre</code>.</div>
     </div>
     <aside class="notes">
       Rappel de 2ARCH, utile au TP1 (afficher un nombre, passer en majuscule) et au TP3 (décoder les octets d'un mot de passe). Faire convertir 'H' en binaire à la salle : 72 = 64 + 8 = 01001000.
@@ -191,9 +221,9 @@ b8 07 00 00 00
             <tr><th>non signée</th><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr>
             <tr class="car"><th>signée</th><td>−128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr>
           </table>
-          <p class="petit"><code>11111111</code> = <code>0xFF</code> se lit 255 en non signé, mais −128&nbsp;+&nbsp;64&nbsp;+&nbsp;32&nbsp;+&nbsp;16&nbsp;+&nbsp;8&nbsp;+&nbsp;4&nbsp;+&nbsp;2&nbsp;+&nbsp;1 = −1 en signé.</p>
+          <p class="petit"><code>11111111</code> = <code>0xFF</code> se lit 255 en non signé, mais −128&nbsp;+&nbsp;64&nbsp;+&nbsp;32&nbsp;+&nbsp;16&nbsp;+&nbsp;8&nbsp;+&nbsp;4&nbsp;+&nbsp;2&nbsp;+&nbsp;1 = −1 en signé. De même, <code>11000000</code> = −128&nbsp;+&nbsp;64 = −64.</p>
           <p class="petit"><strong>En signé, un bit de gauche à 1 signale un nombre négatif.</strong></p>
-          <p class="petit muet">💡 255 ne s'écrit pas en signé sur 8 bits : il faut 16&nbsp;bits (de&nbsp;−32&nbsp;768 à 32&nbsp;767).</p>
+          <p class="petit muet">💡 Pour 255 en signé, il faut 16&nbsp;bits (−32&nbsp;768 à 32&nbsp;767).</p>
         </div>
         <div>
           <p><strong>Écrire −1 sur 8 bits</strong></p>
@@ -203,7 +233,7 @@ b8 07 00 00 00
             <tr class="car"><th>+ 1</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
           </table>
           <p class="petit">Chaque 0 devient 1 et chaque 1 devient 0, puis on ajoute 1 : <code>11111111</code> = <code>0xFF</code> = −1.</p>
-          <p class="petit muet">💡 Vérification : <code>11111111</code> + 1 = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits : il reste 0, donc c'est bien −1.</p>
+          <p class="petit muet">💡 Vérification : <code>11111111</code> + 1 = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits : reste 0, donc c'est bien −1.</p>
         </div>
       </div>
       <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : c'est <strong>vous, dans le programme</strong>, qui choisissez la lecture. Pour multiplier, <code>mul</code> lit en non signé et <code>imul</code> (<em>i</em> pour <em>integer</em>, entier) en signé.</div>
@@ -236,12 +266,37 @@ b8 07 00 00 00
             <tr><th>Adresse</th><td>+0</td><td>+1</td><td>+2</td><td>+3</td></tr>
             <tr class="car"><th>Octet</th><td>44</td><td>33</td><td>22</td><td>11</td></tr>
           </table>
-          <p class="petit"><strong>Pourquoi c'est utile</strong> : un débogueur affiche la mémoire octet par octet, donc un nombre y apparaît à l'envers. <code>total dq 1000</code> (soit <code>0x3E8</code>) s'affiche <code>e8 03 00 00 00 00 00 00</code>.</p>
+          <p class="petit"><strong>Pourquoi c'est utile</strong> : un débogueur affiche la mémoire octet par octet, donc un nombre y apparaît à l'envers. <code>total dq 1000</code> (soit <code>0x3E8</code>) s'affiche <code>e8 03 00 00 00 00 00 00</code> : <code>dq</code> occupe toujours 8 octets, même si 1000 n'en remplit que 2.</p>
         </div>
       </div>
     </div>
     <aside class="notes">
       Le petit-boutisme n'a pas été vu en 2ARCH : il piège tout le monde la première fois qu'on lit la mémoire dans GDB. On le retrouve au TP1.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Quand les bits manquent : deux bugs célèbres</h2>
+    <div class="corps">
+      <div class="colonnes">
+        <div>
+          <p><strong>Le bug de l'an 2038</strong> (lecture signée)</p>
+          <figure class="illustration">
+            <img src="../assets/img/an-2038.png" alt="Compteur binaire de 32 bits : le bit de gauche passe à 1 et la date saute de 2038 à 1901" style="width: 260px;">
+            <figcaption>D'après une animation de Monaneko, domaine public (<a href="https://commons.wikimedia.org/wiki/File:Year_2038_problem.gif" target="_blank">Wikimedia Commons</a>)</figcaption>
+          </figure>
+          <p class="petit">Linux compte les secondes depuis le 1<sup>er</sup> janvier 1970 dans un entier <strong>signé de 32 bits</strong>. Le 19 janvier 2038, le bit de gauche passe à 1 : le nombre devient négatif et la date revient en 1901.</p>
+        </div>
+        <div>
+          <p><strong>Le niveau 256 de Pac-Man</strong> (un octet)</p>
+          <p class="petit">Le jeu d'arcade (1980) range le numéro de niveau dans <strong>un octet</strong>, qui va de 0 à 255. Au niveau 256, le calcul qui dessine les fruits en bas de l'écran déborde : la moitié droite de l'écran se remplit de symboles et le niveau ne peut pas être terminé.</p>
+          <p class="petit muet">💡 Images et explication : <a href="https://fr.wikipedia.org/wiki/Pac-Man#Bug_au_256e_niveau" target="_blank">le bug du 256<sup>e</sup> niveau sur Wikipédia</a>. Et pour 2038 : <a href="https://fr.wikipedia.org/wiki/Bug_de_l%27an_2038" target="_blank">le bug de l'an 2038</a>.</p>
+        </div>
+      </div>
+      <div class="encadre usage">Choisir la taille et la lecture d'une donnée n'est pas un détail. Pour 2038, Linux range désormais les dates sur 64 bits.</div>
+    </div>
+    <aside class="notes">
+      Faire calculer : 2 147 483 647 = 0x7FFFFFFF, le plus grand entier signé de 32 bits. Pour Pac-Man : 255 + 1 sur un octet donne 0 (la retenue est perdue), comme la vérification du complément à deux.
     </aside>
   </section>
 
@@ -265,22 +320,34 @@ b8 07 00 00 00
     </div>
   </section>
 
+  <!-- ================================================================== -->
+  <!-- #3 LES REGISTRES X86-64                                            -->
+  <!-- ================================================================== -->
+  <section data-layout="section">
+    <div class="numero">#3</div>
+    <h2>Les registres x86-64</h2>
+    <div class="sous-titre">Le processeur</div>
+  </section>
+
   <section>
-    <h2>De votre <em>data path</em> 4 bits à x86-64</h2>
+    <h2>16 registres généraux de 64 bits</h2>
     <div class="corps">
-      <p>En 2ARCH, vous avez construit le cœur d'un processeur dans Logisim. Voici ce qu'il devient dans un vrai processeur.</p>
       <table class="serre">
-        <tr><th>Votre <em>data path</em> Logisim</th><th>Un processeur x86-64</th></tr>
-        <tr><td>4 registres de 4 bits : R0 à R3</td><td>16 registres généraux de 64 bits : <code>rax</code> à <code>r15</code></td></tr>
-        <tr><td>Un OpCode de 2 bits choisit l'opération de l'ALU</td><td>Une <strong>instruction</strong> : <code>add</code>, <code>sub</code>, <code>and</code>, <code>or</code>… codée sur 1 à 15 octets</td></tr>
-        <tr><td>Indicateurs Z et N</td><td>ZF et SF, plus <strong>CF</strong> (retenue) et <strong>OF</strong> (débordement signé)</td></tr>
-        <tr><td>Vous jouiez l'unité de contrôle en réglant les broches</td><td>Le <strong>programme</strong> le fait : le processeur lit les instructions en mémoire, une par une</td></tr>
-        <tr><td>Une horloge en tick manuel</td><td>Environ 3 milliards de cycles par seconde, ou une instruction à la fois avec un débogueur</td></tr>
+        <tr><th>Registre</th><th>Nom complet</th><th>Usage habituel</th><th>Registre</th><th>Nom complet</th><th>Usage habituel</th></tr>
+        <tr><td><code>rax</code></td><td><em>accumulator</em></td><td>résultat d'un calcul, n° d'appel système</td><td><code>rsi</code></td><td><em>source index</em></td><td>source, 2<sup>e</sup> argument</td></tr>
+        <tr><td><code>rbx</code></td><td><em>base</em></td><td>usage libre</td><td><code>rdi</code></td><td><em>destination index</em></td><td>destination, 1<sup>er</sup> argument</td></tr>
+        <tr><td><code>rcx</code></td><td><em>counter</em></td><td>compteur de boucle</td><td><code>rbp</code></td><td><em>base pointer</em></td><td>base de la pile d'une fonction</td></tr>
+        <tr><td><code>rdx</code></td><td><em>data</em></td><td>données, 3<sup>e</sup> argument</td><td><code>rsp</code></td><td><em>stack pointer</em></td><td><strong>sommet de la pile</strong> : ne pas y toucher</td></tr>
+        <tr><td colspan="6"><code>r8</code> à <code>r15</code> : huit registres supplémentaires, simplement numérotés, ajoutés avec le passage au 64 bits</td></tr>
       </table>
-      <div class="encadre" style="margin-top: 12px;">Votre question bonus « 7 + 2 = 1001 allume N » trouve sa réponse en x86-64 : l'indicateur <strong>OF</strong> signale ce débordement signé.</div>
+      <p class="petit muet">💡 Un <strong>registre</strong> est une petite case de mémoire à l'intérieur du processeur, la plus rapide. Le <em>r</em> de <code>rax</code>, <code>rip</code>… vient de <em>register</em> : il marque la version 64 bits d'un registre plus ancien (<code>ax</code> sur 16 bits, <code>eax</code> sur 32 bits).</p>
+      <div class="colonnes" style="margin-top: 14px;">
+        <div class="encadre"><code>rip</code> : adresse de la prochaine instruction. On ne l'écrit jamais directement.</div>
+        <div class="encadre"><code>rflags</code> : les <strong>indicateurs</strong>, mis à jour par l'ALU après chaque calcul.</div>
+      </div>
     </div>
     <aside class="notes">
-      Le pont avec leur TP noté de 2ARCH. Faire le parallèle ligne à ligne : ils connaissent déjà tout l'intérieur, on monte d'un étage.
+      Les noms viennent du 8086 de 1978. Traductions : accumulateur, base, compteur, données, index source, index destination, pointeur de base, pointeur de pile (stack = pile). Le x de rax vient de « extended » (ax regroupait ah et al). Le r ajouté en 64 bits signifie register.
     </aside>
   </section>
 
@@ -290,7 +357,7 @@ b8 07 00 00 00
       <div class="colonnes">
         <div>
           <ul class="dense">
-            <li><code>rip</code> (<em>instruction pointer</em>) contient l'<strong>adresse de la prochaine instruction</strong>. Le processeur répète sans fin le même <strong>cycle d'exécution</strong> : lire l'instruction rangée à l'adresse <code>rip</code>, faire avancer <code>rip</code> jusqu'à la suivante, puis exécuter l'instruction lue</li>
+            <li><code>rip</code> (<em>instruction pointer</em>, pointeur d'instruction) contient l'<strong>adresse de la prochaine instruction</strong>. Le processeur répète sans fin le même <strong>cycle d'exécution</strong> : lire l'instruction rangée à l'adresse <code>rip</code>, faire avancer <code>rip</code> jusqu'à la suivante, puis exécuter l'instruction lue</li>
             <li>Un saut, un appel de fonction ou un retour se contentent de <strong>modifier <code>rip</code></strong></li>
             <li>On ne l'écrit jamais directement : seules les instructions de saut le changent</li>
           </ul>
@@ -305,36 +372,6 @@ b8 07 00 00 00
     </div>
     <aside class="notes">
       Les protections modernes (mémoire non exécutable, NX) existent justement à cause de ce partage entre code et données.
-    </aside>
-  </section>
-
-  <!-- ================================================================== -->
-  <!-- #3 LES REGISTRES X86-64                                            -->
-  <!-- ================================================================== -->
-  <section data-layout="section">
-    <div class="numero">#3</div>
-    <h2>Les registres x86-64</h2>
-    <div class="sous-titre">Le processeur</div>
-  </section>
-
-  <section>
-    <h2>16 registres généraux de 64 bits</h2>
-    <div class="corps">
-      <table class="serre">
-        <tr><th>Registre</th><th>Usage habituel</th><th>Registre</th><th>Usage habituel</th></tr>
-        <tr><td><code>rax</code></td><td>résultat d'un calcul, numéro d'appel système</td><td><code>rsi</code></td><td>source, 2<sup>e</sup> argument</td></tr>
-        <tr><td><code>rbx</code></td><td>usage libre</td><td><code>rdi</code></td><td>destination, 1<sup>er</sup> argument</td></tr>
-        <tr><td><code>rcx</code></td><td>compteur de boucle</td><td><code>rbp</code></td><td>base de la pile d'une fonction</td></tr>
-        <tr><td><code>rdx</code></td><td>données, 3<sup>e</sup> argument</td><td><code>rsp</code></td><td><strong>sommet de la pile</strong> : ne pas y toucher</td></tr>
-        <tr><td colspan="4"><code>r8</code> à <code>r15</code> : huit registres supplémentaires, ajoutés avec le passage au 64 bits</td></tr>
-      </table>
-      <div class="colonnes" style="margin-top: 14px;">
-        <div class="encadre"><code>rip</code> : adresse de la prochaine instruction. On ne l'écrit jamais directement.</div>
-        <div class="encadre"><code>rflags</code> : les <strong>indicateurs</strong>, mis à jour par l'ALU après chaque calcul.</div>
-      </div>
-    </div>
-    <aside class="notes">
-      Les noms viennent du 8086 de 1978 : a = accumulateur, c = compteur, d = données, si/di = source/destination index. Le r ajouté en 64 bits signifie register.
     </aside>
   </section>
 
