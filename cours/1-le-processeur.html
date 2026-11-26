@@ -604,9 +604,9 @@ _start:
         <div class="dense">
           <ul style="font-size: .85em;">
             <li><code>section .data</code> : les <strong>données</strong> ; <code>section .text</code> : le <strong>code</strong></li>
-            <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, c'est-à-dire des noms donnés à une adresse. <code>msg</code> joue le rôle d'une <strong>variable</strong> (là où sont rangées les données), <code>_start</code> celui du <code>main</code> d'un programme C (la première instruction exécutée)</li>
+            <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, des noms donnés à une adresse. <code>msg</code> joue le rôle d'une <strong>variable</strong> (là où sont rangées les données), <code>_start</code> celui du <code>main</code> d'un programme C (la première instruction exécutée)</li>
             <li><code>db</code> (<em>define byte</em>) range des octets : les 12 caractères du message, puis 10, le saut de ligne</li>
-            <li><code>len equ $ - msg</code> : <code>equ</code> (<em>equate</em>) donne un nom à une constante. <code>$</code> est l'adresse elle-même (pas son contenu) où NASM écrit à cet endroit, juste après le message : <code>0x40200d</code>. <code>len</code> = <code>0x40200d</code> − <code>0x402000</code> = 13 octets</li>
+            <li><code>len equ $ - msg</code> : <code>equ</code> (<em>equate</em>) donne un nom à une constante. <code>$</code> vaut l'adresse (pas son contenu) juste après le message : <code>0x40200d</code>. <code>len</code> = <code>0x40200d</code> − <code>0x402000</code> = 13, le <strong>nombre d'octets entre deux adresses</strong> (12 caractères + le saut de ligne)</li>
           </ul>
         </div>
       </div>
