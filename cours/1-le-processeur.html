@@ -22,35 +22,6 @@
     </div>
   </section>
 
-  <section>
-    <h2>Un programme sans son code source</h2>
-    <div class="corps">
-      <div class="colonnes code-texte">
-        <pre class="terminal" data-titre="Terminal"><code class="language-plaintext" data-trim>
-$ ./coffre
-Mot de passe : devine
-Mauvais mot de passe.
-$ strings coffre | head -4
-Mot de passe :
-Cosmo2026
-Coffre ouvert.
-Mauvais mot de passe.
-$ ./coffre
-Mot de passe : Cosmo2026
-Coffre ouvert.
-</code></pre>
-        <div>
-          <p class="petit">Je n'ai que l'exécutable <code>coffre</code>, pas son code. <code>strings</code> affiche les suites d'octets qui ressemblent à du texte : le mot de passe était rangé <strong>en clair</strong> dans le programme.</p>
-          <p class="petit">Ce module vous apprend à lire ces octets. Au TP3, vous retrouverez vous-même les mots de passe de trois programmes.</p>
-          <p class="petit muet">⚠️ Ranger un mot de passe en clair est une faute de sécurité.</p>
-        </div>
-      </div>
-      <div class="encadre usage">C'est le métier de l'analyste en cybersécurité : comprendre un logiciel malveillant, qui n'est jamais livré avec son code source.</div>
-    </div>
-    <aside class="notes">
-      Démo en direct dans le Codespace (source dans corriges/demos/coffre.asm, construit avec « ld -s » pour retirer les noms). Faire deviner le mot de passe à la salle avant de lancer strings.
-    </aside>
-  </section>
 
   <section data-layout="sommaire">
     <h1>Sommaire</h1>
@@ -179,7 +150,7 @@ b8 07 00 00 00
   <section>
     <h2>Un assembleur par famille de processeurs</h2>
     <div class="corps">
-      <p>Chaque famille de processeurs a son propre <strong>jeu d'instructions</strong> (ISA, <em>Instruction Set Architecture</em>) : la liste des instructions qu'elle sait exécuter.</p>
+      <p>Chaque famille de processeurs a son propre <strong>jeu d'instructions</strong> : la liste des instructions qu'elle sait exécuter.</p>
       <table>
         <tr><th>Famille</th><th>Où la trouve-t-on ?</th><th>Instruction</th></tr>
         <tr><td><strong>x86-64</strong> (Intel, AMD)</td><td>PC, serveurs, la plupart des logiciels malveillants</td><td style="white-space: nowrap"><code>add eax, 5</code></td></tr>
@@ -210,9 +181,9 @@ b8 07 00 00 00
       <ul class="dense">
         <li>Un <strong>octet</strong> = 8 bits = 2 chiffres hexadécimaux : <code>0xFF</code> = 255, <code>0x2A</code> = 42</li>
         <li><strong>ASCII</strong> (<em>American Standard Code for Information Interchange</em>) : un caractère = un octet. <code>'0'</code> = <code>0x30</code>, <code>'A'</code> = <code>0x41</code>, saut de ligne = 10 (<code>0x0A</code>)</li>
-        <li><strong>Von Neumann</strong> : le programme et les données sont rangés dans la même mémoire</li>
+        <li><strong>Architecture de Von Neumann</strong> : le programme et les données sont rangés dans la même mémoire. Une instruction n'est qu'une suite d'octets, comme un texte</li>
       </ul>
-      <p class="petit muet" style="margin-top: 4px;">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal (base 16). Sans préfixe, un nombre est lu en décimal. Chiffres 0 à 9, puis A = 10 … F = 15. Chaque rang vaut 16 fois le précédent : <code>0x2A</code> =&nbsp;2&nbsp;×&nbsp;16&nbsp;+&nbsp;10&nbsp;=&nbsp;42 et <code>0xFF</code> =&nbsp;15&nbsp;×&nbsp;16&nbsp;+&nbsp;15&nbsp;=&nbsp;255.</p>
+      <p class="petit muet" style="margin-top: 4px;">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal (base 16). Sans préfixe, un nombre est lu en décimal. Chiffres 0 à 9, puis A = 10 … F = 15. Chaque rang pèse 16 fois plus que celui de droite : <code>0x2A</code> =&nbsp;2&nbsp;×&nbsp;16&nbsp;+&nbsp;10&nbsp;=&nbsp;42 et <code>0xFF</code> =&nbsp;15&nbsp;×&nbsp;16&nbsp;+&nbsp;15&nbsp;=&nbsp;255.</p>
       <div class="encadre usage" style="margin-top: 4px;">L'hexadécimal est la langue des outils : un débogueur affiche registres, adresses et octets en hexa. Un octet s'y écrit en 2 chiffres, contre 8 en binaire.</div>
     </div>
     <aside class="notes">
@@ -245,7 +216,7 @@ b8 07 00 00 00
           </ul>
         </div>
       </div>
-      <div class="encadre usage" style="margin-top: 6px;">Le message de <code>hello.asm</code> est rangé en <code style="white-space: nowrap">48 65 6c 6c 6f…</code> (<code>"Hello…"</code>). <code>strings</code>, la commande qui a trahi le coffre, affiche ainsi toute suite d'octets ASCII lisibles.</div>
+      <div class="encadre usage" style="margin-top: 6px;">Le message de <code>hello.asm</code> est rangé en <code style="white-space: nowrap">0x48 0x65 0x6c 0x6c 0x6f…</code> (<code>"Hello…"</code>). La commande <code>strings</code> repère ces codes pour lire le texte d'un programme.</div>
     </div>
     <aside class="notes">
       Rappel de 2ARCH, utile au TP1 (afficher un nombre, passer en majuscule) et au TP3 (décoder les octets d'un mot de passe). Faire convertir 'H' en binaire à la salle : 72 = 64 + 8 = 01001000.
@@ -298,7 +269,6 @@ Contents of section .data:
             <tr class="car"><th>+ 1</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
           </table>
           <p class="petit">Chaque 0 devient 1 et chaque 1 devient 0, puis on ajoute 1 : <code>11111111</code> = <code>0xFF</code> = −1.</p>
-          <p class="petit muet">💡 Vérification : <code>11111111</code> + 1 = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits : reste 0, donc c'est bien −1.</p>
         </div>
       </div>
       <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : c'est <strong>vous, dans le programme</strong>, qui choisissez la lecture. Pour multiplier, <code>mul</code> lit en non signé et <code>imul</code> (<em>i</em> pour <em>integer</em>, entier) en signé.</div>
@@ -380,7 +350,6 @@ $ echo $?
           <p><a href="https://fr.wikipedia.org/wiki/Bug_de_l%27an_2038" target="_blank"><strong>Le bug de l'an 2038</strong></a> (lecture signée)</p>
           <figure class="illustration">
             <img src="../assets/img/an-2038.png" alt="Compteur binaire de 32 bits : le bit de gauche passe à 1 et la date saute de 2038 à 1901" style="width: 260px;">
-            <figcaption>D'après Monaneko, domaine public (<a href="https://commons.wikimedia.org/wiki/File:Year_2038_problem.gif" target="_blank">Commons</a>)</figcaption>
           </figure>
           <p class="petit">Linux compte les secondes depuis le 1<sup>er</sup> janvier 1970 dans un entier <strong>signé de 32 bits</strong>. Le 19 janvier 2038, le bit de gauche passe à 1 : le nombre devient négatif et la date revient en 1901.</p>
         </div>
@@ -443,7 +412,7 @@ $ echo $?
         <tr><td class="cle"><code>rdx</code></td><td class="cle"><em>data</em></td><td class="cle">3<sup>e</sup> argument</td><td><code>rbp</code></td><td><em style="white-space: nowrap">base pointer</em></td><td>base de la pile</td></tr>
         <tr><td colspan="6"><code>r8</code> à <code>r15</code> : huit registres de plus, simplement numérotés. Seul <code>r8</code> servira, au TP2.</td></tr>
       </table>
-      <p class="petit muet">💡 Un <strong>registre</strong> est une petite case de mémoire à l'intérieur du processeur, la plus rapide. Le <em>r</em> de <code>rax</code>, <code>rip</code>… vient de <em>register</em>.</p>
+      <p class="petit muet">💡 Un <strong>registre</strong> est une case de mémoire à l'intérieur du processeur. Le <em>r</em> de <code>rax</code>, <code>rip</code>… vient de <em>register</em>.</p>
       <div class="encadre usage" style="margin-top: 10px;">Quel registre choisir ? Un appel système impose les quatre à retenir. Pour vos calculs, prenez un registre libre (<code>rbx</code>, <code>rcx</code>…), mais jamais <code>rsp</code>.</div>
     </div>
     <aside class="notes">
@@ -559,7 +528,7 @@ $ ./pin ; echo $?
           <p class="petit muet">💡 Avec <code>mov rax, 1111</code>, <code>echo $?</code> affiche 1.</p>
         </div>
       </div>
-      <div class="encadre usage">Le <code>coffre</code> du début de cours fait de même : il compare le mot de passe saisi, puis saute.</div>
+      <div class="encadre usage">C'est ainsi qu'un programme vérifie un mot de passe : une comparaison, puis un saut.</div>
     </div>
     <aside class="notes">
       Démo en direct : assembler, lancer, puis remplacer 1234 par 1111. Dans GDB, info registers eflags montre ZF juste après cmp (le TP1 le fait faire).
@@ -599,12 +568,12 @@ _start:
     mov rdi, 0      ; 1er argument : code de retour 0
     syscall         ; exit lit le code de retour dans rdi
 </code></pre>
-          <p class="petit muet">💡 <code>;</code> commence un commentaire. <code>$</code> n'est pas <code>rip</code> : NASM le calcule en assemblant. Les noms <code>.text</code> et <code>.data</code> sont imposés : ils fixent les droits (code exécutable, données modifiables).</p>
+          <p class="petit muet">💡 <code>;</code> commence un commentaire. Les noms <code>.text</code> et <code>.data</code> sont imposés : ils fixent les droits (code exécutable, données modifiables).</p>
         </div>
         <div class="dense">
           <ul style="font-size: .85em;">
             <li><code>section .data</code> : les <strong>données</strong> ; <code>section .text</code> : le <strong>code</strong></li>
-            <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, des noms donnés à une adresse. <code>msg</code> joue le rôle d'une <strong>variable</strong> (là où sont rangées les données), <code>_start</code> celui du <code>main</code> d'un programme C (la première instruction exécutée)</li>
+            <li><code>msg</code>, <code>_start</code> : des <strong>étiquettes</strong>, des noms donnés à une adresse. <code>msg</code> joue le rôle d'une <strong>variable</strong>, <code>_start</code> celui du <code>main</code> d'un programme C</li>
             <li><code>db</code> (<em>define byte</em>) range des octets : les 12 caractères du message, puis 10, le saut de ligne</li>
             <li><code>len equ $ - msg</code> : <code>equ</code> (<em>equate</em>) donne un nom à une constante. <code>$</code> vaut l'adresse (pas son contenu) juste après le message : <code>0x40200d</code>. <code>len</code> = <code>0x40200d</code> − <code>0x402000</code> = 13, le <strong>nombre d'octets entre deux adresses</strong> (12 caractères + le saut de ligne)</li>
           </ul>
@@ -768,7 +737,6 @@ Hello World!
       </table>
       <ul class="dense" style="margin-top: 12px;">
         <li>Un <strong>opérande</strong> est un registre, une valeur immédiate (<code>7</code>) ou une case mémoire (<code>[adresse]</code>)</li>
-        <li>Les deux opérandes ont <strong>la même taille</strong> et au plus un des deux est en mémoire</li>
       </ul>
     </div>
   </section>
