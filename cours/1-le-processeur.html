@@ -198,13 +198,14 @@ b8 07 00 00 00
           <p class="petit muet">💡 En lecture signée, un bit de gauche à 1 signale un nombre négatif.</p>
         </div>
         <div>
-          <p><strong>Écrire −x sur 8 bits</strong></p>
-          <ol class="dense">
-            <li>Écrire x en binaire : 1 = <code>00000001</code></li>
-            <li>Inverser tous les bits : <code>11111110</code></li>
-            <li>Ajouter 1 : <code>11111111</code> = <code>0xFF</code></li>
-          </ol>
-          <p class="petit">Vérification : <code>11111111</code> + <code>00000001</code> = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits et disparaît : il reste 0, donc c'est bien −1.</p>
+          <p><strong>Écrire −1 sur 8 bits</strong></p>
+          <table class="indices">
+            <tr><th>1</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+            <tr><th>inverser</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+            <tr class="car"><th>+ 1</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          </table>
+          <p class="petit">Chaque 0 devient 1 et chaque 1 devient 0, puis on ajoute 1 : <code>11111111</code> = <code>0xFF</code> = −1.</p>
+          <p class="petit muet">💡 Vérification : <code>11111111</code> + 1 = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits et disparaît : il reste 0, donc c'est bien −1.</p>
         </div>
       </div>
       <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur ne le sait pas et calcule de la même façon dans les deux cas. C'est <strong>l'instruction choisie</strong> qui lit le résultat en signé ou en non signé. Vous le verrez avec les indicateurs CF et OF.</div>
