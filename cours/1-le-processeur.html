@@ -469,6 +469,7 @@ $ echo $?
           <p class="petit">Prendre le contrôle de <code>rip</code> est le but de la plupart des attaques sur les binaires.</p>
         </div>
       </div>
+      <div class="encadre usage">Au TP1, vous verrez <code>rip</code> avancer dans GDB à chaque instruction. Au TP3, vous le modifierez pour sauter par-dessus la vérification d'un mot de passe.</div>
     </div>
     <aside class="notes">
       Les protections modernes (mémoire non exécutable, NX) existent justement à cause de ce partage entre code et données.
@@ -736,30 +737,27 @@ $ echo $?
     <h2>Que contient <code>rax</code> ?</h2>
     <div class="corps">
       <div class="colonnes code-texte">
-        <pre class="mini" data-titre="subregs.asm" data-code="22"><code class="language-x86asm" data-trim>
-; subregs.asm : les sous-registres de rax
+        <pre class="mini" data-titre="subregs.asm" data-code="5"><code class="language-x86asm" data-trim>
+; subregs.asm : écrire dans les sous-registres
 section .text
     global _start
 
 _start:
     mov rax, 0x1122334455667788
-    mov al, 0xFF
-    mov ax, 0xABCD
-    mov rbx, rax
-    shr rbx, 56         ; décale de 56 bits vers la droite
-    mov eax, 5
-    add rax, rbx
+    mov al, 0xFF        ; question 1
+    mov ax, 0           ; question 2
+    mov eax, 5          ; question 3
 
-    mov rdi, rax
+    mov rdi, rax        ; code de retour = rax
     mov rax, 60
     syscall
 </code></pre>
         <div>
-          <div class="reponse fragment">Après <code>mov al, 0xFF</code> : <code>0x11223344556677FF</code></div>
-          <div class="reponse fragment">Après <code>mov ax, 0xABCD</code> : <code>0x112233445566ABCD</code></div>
-          <div class="reponse fragment"><code>rbx</code> = <code>0x11</code> : les 8 bits de poids fort de <code>rax</code></div>
-          <div class="reponse fragment">Après <code>mov eax, 5</code> : <code>0x5</code>, les bits hauts sont effacés</div>
-          <div class="reponse fragment">Code de retour : 5 + <code>0x11</code> = <strong>22</strong></div>
+          <p class="petit">Que contient <code>rax</code> après chacune des trois questions ? Revoyez le schéma des sous-registres : <code>al</code> = 8 bits, <code>ax</code> = 16 bits, <code>eax</code> = 32 bits.</p>
+          <div class="reponse fragment">1. <code>0x11223344556677<strong>FF</strong></code> : seul l'octet de droite change</div>
+          <div class="reponse fragment">2. <code>0x112233445566<strong>0000</strong></code> : seuls les 16 bits de droite changent</div>
+          <div class="reponse fragment">3. <code>0x<strong>0000000000000005</strong></code> : écrire dans <code>eax</code> efface les 32 bits de gauche (le piège)</div>
+          <div class="reponse fragment"><code>echo $?</code> affiche donc <strong>5</strong></div>
         </div>
       </div>
     </div>
