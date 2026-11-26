@@ -29,7 +29,7 @@
       <li>Ce que vous savez déjà, version x86-64</li>
       <li>Les registres x86-64</li>
       <li>Un premier programme</li>
-      <li>Premiers pas dans GDB</li>
+      <li>Premiers pas dans GDB (<em>GNU Debugger</em>)</li>
     </ol>
   </section>
 
@@ -137,7 +137,6 @@ b8 07 00 00 00
       <p>Vu en <strong>2ARCH</strong>, utilisé à chaque ligne en assembleur.</p>
       <ul class="dense">
         <li>Un <strong>octet</strong> = 8 bits = 2 chiffres hexadécimaux : <code>0xFF</code> = 255, <code>0x2A</code> = 42</li>
-        <li><strong>Complément à deux</strong> : −x = bits de x inversés + 1. Sur 8 bits, −1 s'écrit <code>0xFF</code></li>
         <li><strong>ASCII</strong> : un caractère = un octet. <code>'0'</code> = <code>0x30</code>, <code>'A'</code> = <code>0x41</code>, saut de ligne = 10 (<code>0x0A</code>)</li>
         <li><strong>Von Neumann</strong> : le programme et les données sont rangés dans la même mémoire</li>
       </ul>
@@ -150,19 +149,85 @@ b8 07 00 00 00
   </section>
 
   <section>
+    <h2>La table ASCII : un caractère, un octet</h2>
+    <div class="corps">
+      <div class="colonnes schema-texte">
+        <div>
+          <table class="serre">
+            <tr><th>Caractère</th><th>Décimal</th><th>Hexa</th><th>Binaire</th></tr>
+            <tr><td>saut de ligne</td><td>10</td><td><code>0x0A</code></td><td><code>00001010</code></td></tr>
+            <tr><td>espace</td><td>32</td><td><code>0x20</code></td><td><code>00100000</code></td></tr>
+            <tr><td><code>'0'</code></td><td>48</td><td><code>0x30</code></td><td><code>00110000</code></td></tr>
+            <tr><td><code>'7'</code></td><td>55</td><td><code>0x37</code></td><td><code>00110111</code></td></tr>
+            <tr><td><code>'A'</code></td><td>65</td><td><code>0x41</code></td><td><code>01000001</code></td></tr>
+            <tr><td><code>'H'</code></td><td>72</td><td><code>0x48</code></td><td><code>01001000</code></td></tr>
+            <tr><td><code>'a'</code></td><td>97</td><td><code>0x61</code></td><td><code>01100001</code></td></tr>
+            <tr><td><code>'i'</code></td><td>105</td><td><code>0x69</code></td><td><code>01101001</code></td></tr>
+          </table>
+        </div>
+        <div>
+          <ul class="dense">
+            <li><strong>Chiffres</strong> : le code d'un chiffre vaut ce chiffre + 48 (<code>0x30</code>). <code>'7'</code> = 7 + 48 = 55</li>
+            <li><strong>Lettres</strong> : rangées dans l'ordre. Une minuscule vaut sa majuscule + 32 : <code>'a'</code> − <code>'A'</code> = 97 − 65</li>
+            <li>Dans GDB, <code>p/c 72</code> affiche le caractère et <code>p/d 'H'</code> son code</li>
+          </ul>
+          <p class="petit muet">💡 Table complète : <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange" target="_blank">ASCII sur Wikipédia</a>. Elle code 128 caractères, de 0 à 127.</p>
+        </div>
+      </div>
+      <div class="encadre marine" style="margin-top: 6px;">En mémoire, <code>"Hi"</code> n'est qu'une suite d'octets : <code>48 69</code>. Le processeur ne voit jamais de lettres, seulement des nombres.</div>
+    </div>
+    <aside class="notes">
+      Rappel de 2ARCH, utile au TP1 (afficher un nombre, passer en majuscule) et au TP3 (décoder les octets d'un mot de passe). Faire convertir 'H' en binaire à la salle : 72 = 64 + 8 = 01001000.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Les nombres négatifs : le complément à deux</h2>
+    <div class="corps">
+      <div class="colonnes schema-texte">
+        <div>
+          <p class="petit">Les mêmes 8 bits se lisent de deux façons :</p>
+          <table class="serre">
+            <tr><th>Bits</th><th>Hexa</th><th>Lecture non signée</th><th>Lecture signée</th></tr>
+            <tr><td><code>00000001</code></td><td><code>0x01</code></td><td>1</td><td>1</td></tr>
+            <tr><td><code>01111111</code></td><td><code>0x7F</code></td><td>127</td><td>127</td></tr>
+            <tr><td><code>10000000</code></td><td><code>0x80</code></td><td>128</td><td>−128</td></tr>
+            <tr><td><code>11111110</code></td><td><code>0xFE</code></td><td>254</td><td>−2</td></tr>
+            <tr><td><code>11111111</code></td><td><code>0xFF</code></td><td>255</td><td>−1</td></tr>
+          </table>
+          <p class="petit muet">💡 En lecture signée, un bit de gauche à 1 signale un nombre négatif.</p>
+        </div>
+        <div>
+          <p><strong>Écrire −x sur 8 bits</strong></p>
+          <ol class="dense">
+            <li>Écrire x en binaire : 1 = <code>00000001</code></li>
+            <li>Inverser tous les bits : <code>11111110</code></li>
+            <li>Ajouter 1 : <code>11111111</code> = <code>0xFF</code></li>
+          </ol>
+          <p class="petit">Vérification : <code>11111111</code> + <code>00000001</code> = <code>1 00000000</code>. Le 1 de gauche ne tient pas sur 8 bits et disparaît : il reste 0, donc c'est bien −1.</p>
+        </div>
+      </div>
+      <div class="encadre marine" style="margin-top: 6px;"><code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur ne le sait pas. C'est <strong>l'instruction choisie</strong> qui décide de l'interprétation, signée ou non signée.</div>
+    </div>
+    <aside class="notes">
+      Faire calculer −2 à la salle : 00000010, inversé 11111101, plus 1 : 11111110 = 0xFE. Cette notion sert au TP1 (−1 dans rbx, neg rax, 3 − 5 et les drapeaux) et aux sauts signés jl / non signés jb du cours 2.
+    </aside>
+  </section>
+
+  <section>
     <h2>Ce qui change en x86-64</h2>
     <div class="corps">
-      <div class="colonnes">
+      <div class="colonnes schema-texte">
         <div>
           <p><strong>Des données de plusieurs tailles</strong></p>
           <table class="serre">
-            <tr><th>Taille</th><th>Nom NASM</th><th>Directive</th></tr>
+            <tr><th>Taille</th><th>Nom NASM</th><th>Pseudo-instruction</th></tr>
             <tr><td>8 bits</td><td><code>byte</code> (octet)</td><td><code>db</code></td></tr>
             <tr><td>16 bits</td><td><code>word</code> (mot)</td><td><code>dw</code></td></tr>
             <tr><td>32 bits</td><td><code>dword</code> (double mot)</td><td><code>dd</code></td></tr>
             <tr><td>64 bits</td><td><code>qword</code> (quadruple mot)</td><td><code>dq</code></td></tr>
           </table>
-          <p class="petit muet">💡 <code>db</code> (<em>define byte</em>) n'est pas une instruction du processeur. C'est une <strong>directive</strong>, un ordre donné à NASM : il écrit ces octets tels quels dans le programme.</p>
+          <p class="petit muet">💡 <code>db</code> (<em>define byte</em>) n'est pas une instruction du processeur mais une <strong>pseudo-instruction</strong> : NASM écrit ces octets dans le programme.</p>
         </div>
         <div>
           <p><strong>Le petit-boutisme</strong> (<em>little-endian</em>)</p>
@@ -173,9 +238,6 @@ b8 07 00 00 00
           </table>
           <p class="petit">Revoyez <code>b8 07 00 00 00</code> : le 7 vient en premier.</p>
         </div>
-      </div>
-      <div class="encadre marine" style="margin-top: 6px;">
-        <code>0xFF</code> vaut 255 <strong>ou</strong> −1 : le processeur ne le sait pas. C'est <strong>l'instruction choisie</strong> qui décide de l'interprétation, signée ou non signée.
       </div>
     </div>
     <aside class="notes">
@@ -522,7 +584,7 @@ _start:
   <section>
     <h2>Un débogueur pour voir l'invisible</h2>
     <div class="corps">
-      <p>Un programme en assembleur n'affiche presque rien. <strong>GDB</strong> (<em>GNU Debugger</em>) permet de l'exécuter <strong>instruction par instruction</strong> et d'observer les registres et la mémoire.</p>
+      <p>Un programme en assembleur n'affiche presque rien. <strong>GDB</strong> (<em>GNU Debugger</em>, le débogueur de GNU, un projet de logiciels libres né en 1983) permet de l'exécuter <strong>instruction par instruction</strong> et d'observer les registres et la mémoire.</p>
       <table class="serre">
         <tr><th>Commande</th><th>Abrégé</th><th>Effet</th></tr>
         <tr><td><code>gdb ./compute</code></td><td></td><td>ouvre le programme dans GDB (sans le lancer)</td></tr>
