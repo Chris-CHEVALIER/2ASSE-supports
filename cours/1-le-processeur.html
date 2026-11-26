@@ -553,8 +553,8 @@ $ ./pin ; echo $?
         <div>
           <p class="petit"><strong>En pseudo-code</strong> : si le code vaut 1234, renvoyer 0 (accepté), sinon renvoyer 1 (refusé).</p>
           <ul class="dense">
-            <li><code>cmp</code> (<em>compare</em>) calcule <code>rax − 1234</code> sans garder le résultat : il ne sert qu'à mettre à jour les indicateurs</li>
-            <li><code>jne</code> (<em>jump if not equal</em>) lit ZF : il saute si les deux valeurs sont différentes</li>
+            <li><code>cmp</code> (<em>compare</em>) calcule <code>rax − 1234</code> sans garder le résultat, pour mettre à jour les indicateurs</li>
+            <li><code>jne</code> (<em>jump if not equal</em>) saute si ZF = 0, donc si les valeurs diffèrent</li>
           </ul>
           <p class="petit muet">💡 Avec <code>mov rax, 1111</code>, <code>echo $?</code> affiche 1.</p>
         </div>
