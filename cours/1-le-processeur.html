@@ -141,6 +141,7 @@ b8 07 00 00 00
         <li><strong>Von Neumann</strong> : le programme et les données sont rangés dans la même mémoire</li>
       </ul>
       <p class="petit muet" style="margin-top: 4px;">💡 Le préfixe <code>0x</code> annonce un nombre écrit en hexadécimal (base 16). Sans préfixe, NASM et GDB lisent du décimal. Chiffres 0 à 9, puis A = 10 … F = 15. Chaque rang vaut 16 fois le précédent : <code>0x2A</code> = 2 × 16 + 10 = 42 et <code>0xFF</code> = 15 × 16 + 15 = 255.</p>
+      <p class="petit muet">💡 <strong>GDB</strong> signifie <em>GNU Debugger</em> : le débogueur, l'outil qui exécute un programme pas à pas pour l'observer. <strong>GNU</strong> (<em>GNU's Not Unix</em>) est un projet de logiciels libres lancé en 1983, auquel appartient aussi <code>ld</code>, l'éditeur de liens.</p>
       <div class="encadre marine" style="margin-top: 4px;">Ce qui est nouveau ici : vous ne dessinez plus les circuits, vous les <strong>pilotez</strong> par des instructions.</div>
     </div>
     <aside class="notes">
@@ -585,7 +586,7 @@ _start:
   <section>
     <h2>Un débogueur pour voir l'invisible</h2>
     <div class="corps">
-      <p>Un programme en assembleur n'affiche presque rien. <strong>GDB</strong> (<em>GNU Debugger</em>, le débogueur de GNU, un projet de logiciels libres né en 1983) permet de l'exécuter <strong>instruction par instruction</strong> et d'observer les registres et la mémoire.</p>
+      <p>Un programme en assembleur n'affiche presque rien. <strong>GDB</strong> (<em>GNU Debugger</em>) permet de l'exécuter <strong>instruction par instruction</strong> et d'observer les registres et la mémoire.</p>
       <table class="serre">
         <tr><th>Commande</th><th>Abrégé</th><th>Effet</th></tr>
         <tr><td><code>gdb ./compute</code></td><td></td><td>ouvre le programme dans GDB (sans le lancer)</td></tr>
