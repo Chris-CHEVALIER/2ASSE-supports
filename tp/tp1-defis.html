@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TP1 – Défis supplémentaires – 2ASSE</title>
+  <link rel="stylesheet" href="../assets/css/enonce.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="panneau"><img src="../assets/charte/logo-hexagone.png" alt="École Hexagone"></div>
+  <div class="titre">
+    <h1>TP1 – Défis supplémentaires</h1>
+    <p><span class="code-module">2ASSE</span> – Architecture bas niveau et assembleur · Vendredi 27 novembre</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="encadre marine">
+    <span class="intitule">Pour celles et ceux qui ont fini</span>
+    <ul>
+      <li>Vous avez terminé les étapes 0 à 5 du TP1, son bonus et le défi « Majuscules » ? Voici deux défis de plus, facultatifs.</li>
+      <li>Ils n'utilisent que des notions du cours 1 : appels système, registres, ASCII et division.</li>
+      <li>Les programmes vont dans le dossier <code>tp1/</code> de votre dépôt. Faites un commit et poussez-le à chaque défi terminé.</li>
+    </ul>
+  </div>
+
+  <nav class="sommaire">
+    <a href="#echo"><span class="n">Défi 1</span><br>Écho</a>
+    <a href="#trois"><span class="n">Défi 2</span><br>Trois chiffres</a>
+  </nav>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="echo">
+    <h2><span class="num">1</span> Écho</h2>
+    <div class="meta"><span class="etiquette clair">read · write · rax en retour</span></div>
+
+    <p>Écrivez le programme <code>echo.asm</code>. Il demande un prénom, le lit au clavier, puis salue la personne :</p>
+    <pre data-titre="Terminal"><code class="language-plaintext">
+      $ ./echo
+      Ton prénom : Manon
+      Bonjour, Manon !
+    </code></pre>
+    <p>Le prénom affiché est celui qui a été tapé : il n'est pas écrit dans le programme.</p>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>L'appel système <strong>read</strong> porte le numéro 0. Ses arguments : <code>rdi</code> = 0 (le clavier), <code>rsi</code> = l'adresse où ranger le texte, <code>rdx</code> = le nombre d'octets au plus.</li>
+        <li>Pour réserver de la place sans valeur de départ, ajoutez une section <code>.bss</code> : <code>name resb 32</code> réserve 32 octets (<em>reserve bytes</em>) à l'adresse <code>name</code>.</li>
+        <li>Après <code>syscall</code>, <code>read</code> renvoie dans <code>rax</code> le <strong>nombre d'octets lus</strong>, saut de ligne compris : 6 pour <code>Manon</code> suivi de Entrée.</li>
+        <li>Le prochain appel écrase <code>rax</code> : copiez d'abord ce nombre dans un registre libre, comme <code>rbx</code>. Retirez-lui 1 pour ne pas afficher le saut de ligne au milieu de la phrase.</li>
+        <li>Trois <code>write</code> suffisent pour la réponse : <code>Bonjour, </code>, le prénom, puis <code> !</code> avec le saut de ligne.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li>avec <code>Manon</code>, <code>./echo</code> affiche <code>Bonjour, Manon !</code> sur une seule ligne ;</li>
+        <li>avec <code>Cosmo</code>, il affiche <code>Bonjour, Cosmo !</code> sans changer le programme ;</li>
+        <li>votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="defi" id="trois">
+    <h2><span class="num">2</span> Trois chiffres</h2>
+    <div class="meta"><span class="etiquette clair">div · ASCII · écriture en mémoire</span></div>
+
+    <p>Écrivez le programme <code>three.asm</code>. Il calcule <code>2 × 127</code>, puis affiche le résultat avec ses trois chiffres :</p>
+    <pre data-titre="Affichage attendu"><code class="language-plaintext">
+      Code de retour : 254
+    </code></pre>
+    <p>Chaque chiffre doit venir du calcul. Partez de cette section <code>.data</code> :</p>
+    <pre data-titre="tp1/three.asm – section .data"><code class="language-x86asm">
+      section .data
+          msg db "Code de retour : "
+          hundreds db "?"
+          tens db "?"
+          units db "?", 10
+          len equ $ - msg
+    </code></pre>
+
+    <details>
+      <summary>Indices</summary>
+      <ul>
+        <li>C'est la suite du bonus <code>number.asm</code>, avec une division de plus.</li>
+        <li>254 divisé par 10 donne 25, reste 4 : le reste est le chiffre des <strong>unités</strong>. Divisez ensuite 25 par 10 : reste 5 (les dizaines), quotient 2 (les centaines).</li>
+        <li><code>div rbx</code> divise <code>rdx:rax</code> : remettez <code>rdx</code> à zéro <strong>avant chaque</strong> division.</li>
+      </ul>
+    </details>
+
+    <div class="encadre">
+      <span class="intitule">Pour valider, assurez-vous que…</span>
+      <ul>
+        <li><code>./three</code> affiche <code>Code de retour : 254</code> suivi d'un saut de ligne ;</li>
+        <li>en remplaçant <code>127</code> par <code>100</code>, il affiche <code>Code de retour : 200</code> ;</li>
+        <li>votre commit est poussé.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pied">Chris CHEVALIER · 2ASSE – Architecture bas niveau et assembleur · École Hexagone</footer>
+
+<script src="../assets/vendor/reveal/plugin/highlight/highlight.js"></script>
+<script src="../assets/js/enonce.js"></script>
+</body>
+</html>
